@@ -1,11 +1,26 @@
 package com.example.chitchatz
 
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.os.Handler
+import android.view.animation.AlphaAnimation
+import androidx.appcompat.app.AppCompatActivity
+import com.example.chitchatz.databinding.ActivityMainBinding
 
 class MainActivity : AppCompatActivity() {
+
+    // Declare the ViewBinding instance
+    private lateinit var binding: ActivityMainBinding
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
+
+        binding = ActivityMainBinding.inflate(layoutInflater)
+
+        setContentView(binding.root)
+            val transaction = supportFragmentManager.beginTransaction()
+        transaction.replace(R.id.fragment_container, Splashscreen())
+            transaction.addToBackStack(null)
+            transaction.commit()
+
     }
 }

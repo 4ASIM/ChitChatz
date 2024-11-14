@@ -1,3 +1,9 @@
 <resources>
     <string name="app_name">ChitChatz</string>
+
+    //splashscreen
+    <string name="tv_appName">ChitChatz</string>
+    <string name="tv_appline">Chat like no one’s watching</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
 </resources>
