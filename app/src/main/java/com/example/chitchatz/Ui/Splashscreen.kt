@@ -14,6 +14,7 @@ import com.example.chitchatz.databinding.FragmentSplashscreenBinding
 class Splashscreen : Fragment() {
     private var _binding: FragmentSplashscreenBinding? = null
     private val binding get() = _binding!!
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -28,12 +29,13 @@ class Splashscreen : Fragment() {
         fadeIn2.duration = 4000
         binding.appline.startAnimation(fadeIn2)
         Handler(Looper.getMainLooper()).postDelayed({
-
             findNavController().navigate(R.id.action_splashScreenFragment_to_dashboardFragment)
         }, 5000)
 
         return binding.root
     }
+    private lateinit var dialogView: View
+
 
     override fun onDestroyView() {
         super.onDestroyView()
