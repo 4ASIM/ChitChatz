@@ -50,4 +50,8 @@ dependencies {
 
     // lottie dependencie for splashscreen and other animation
     implementation ("com.airbnb.android:lottie:5.0.3")
+
+    // navigation (nav graph)
+    implementation("androidx.navigation:navigation-fragment-ktx:2.8.4")
+    implementation("androidx.navigation:navigation-ui-ktx:2.8.4")
 }

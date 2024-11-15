@@ -1,26 +1,28 @@
 package com.example.chitchatz
-
+// MainActivity.kt
 import android.os.Bundle
-import android.os.Handler
-import android.view.animation.AlphaAnimation
 import androidx.appcompat.app.AppCompatActivity
-import com.example.chitchatz.databinding.ActivityMainBinding
+import androidx.navigation.fragment.NavHostFragment
+import androidx.navigation.ui.setupActionBarWithNavController
 
 class MainActivity : AppCompatActivity() {
 
-    // Declare the ViewBinding instance
-    private lateinit var binding: ActivityMainBinding
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_main)
 
-        binding = ActivityMainBinding.inflate(layoutInflater)
-
-        setContentView(binding.root)
-            val transaction = supportFragmentManager.beginTransaction()
-        transaction.replace(R.id.fragment_container, Splashscreen())
-            transaction.addToBackStack(null)
-            transaction.commit()
-
+//        // Get NavController from NavHostFragment
+//        val navHostFragment = supportFragmentManager
+//            .findFragmentById(R.id.nav_host_fragment) as NavHostFragment
+//        val navController = navHostFragment.navController
+//        setupActionBarWithNavController(navController)
     }
+
+//    // Optional: Handle "back" button support
+//    override fun onSupportNavigateUp(): Boolean {
+//        val navHostFragment = supportFragmentManager
+//            .findFragmentById(R.id.nav_host_fragment) as NavHostFragment
+//        val navController = navHostFragment.navController
+//        return navController.navigateUp() || super.onSupportNavigateUp()
+//    }
 }
