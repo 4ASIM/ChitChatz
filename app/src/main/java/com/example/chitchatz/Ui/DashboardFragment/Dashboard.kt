@@ -8,8 +8,10 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
+import androidx.navigation.fragment.findNavController
 import com.example.chitchatz.Database.AppDatabase
 import com.example.chitchatz.Database.User
+import com.example.chitchatz.R
 import com.example.chitchatz.databinding.DialogUserInfoBinding
 import com.example.chitchatz.databinding.FragmentDashboardBinding
 import kotlinx.coroutines.Dispatchers
@@ -33,10 +35,12 @@ class Dashboard : Fragment() {
         savedInstanceState: Bundle?
     ): View? {
         _binding = FragmentDashboardBinding.inflate(inflater, container, false)
-           showUserInfoDialog()
 
+        binding.btSave.setOnClickListener {
+            findNavController().navigate(R.id.action_dashboardFragment_to_wiFiDirectFragment)
+        }
 
-
+        showUserInfoDialog()
         return binding.root
     }
     private lateinit var dialogView: View

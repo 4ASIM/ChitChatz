@@ -17,10 +17,19 @@
     <fragment
         android:id="@+id/dashboardFragment"
         android:name="com.example.chitchatz.Ui.DashboardFragment.Dashboard"
-        android:label="Dashboard" />
+        android:label="Dashboard" >
+        <action
+            android:id="@+id/action_dashboardFragment_to_wiFiDirectFragment"
+            app:destination="@id/wiFiDirectFragment" />
+    </fragment>
     <fragment
         android:id="@+id/informationFragment"
         android:name="com.example.chitchatz.Ui.InformationFragment.InformationFragment"
         android:label="fragment_information"
         tools:layout="@layout/fragment_information" />
+    <fragment
+        android:id="@+id/wiFiDirectFragment"
+        android:name="com.example.chitchatz.Ui.WifiDirectFragment.WiFiDirectFragment"
+        android:label="fragment_wi_fi_direct"
+        tools:layout="@layout/fragment_wi_fi_direct" />
 </navigation>
