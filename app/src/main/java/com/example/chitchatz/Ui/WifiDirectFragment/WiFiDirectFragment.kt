@@ -18,6 +18,7 @@ import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.chitchatz.R
+import com.google.android.material.floatingactionbutton.FloatingActionButton
 
 class WiFiDirectFragment : Fragment(R.layout.fragment_wi_fi_direct) {
 
@@ -67,7 +68,7 @@ class WiFiDirectFragment : Fragment(R.layout.fragment_wi_fi_direct) {
         super.onViewCreated(view, savedInstanceState)
 
         // Initialize RecyclerView
-        recyclerView = view.findViewById(R.id.rvDeviceList)
+        recyclerView = view.findViewById(R.id.rv_showdevicelist)
         recyclerView.layoutManager = LinearLayoutManager(requireContext())
         deviceAdapter = DeviceAdapter(wifiP2pDeviceList)
         recyclerView.adapter = deviceAdapter
@@ -98,8 +99,8 @@ class WiFiDirectFragment : Fragment(R.layout.fragment_wi_fi_direct) {
         // Request permissions and start peer discovery
         checkAndRequestPermissions()
 
-        val button: Button = view.findViewById(R.id.btnDirectDiscover)
-        button.setOnClickListener {
+        val fab: FloatingActionButton = view.findViewById(R.id.btn_searchwifi)
+        fab.setOnClickListener {
             discoverPeers()
         }
     }
