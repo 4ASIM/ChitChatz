@@ -3,6 +3,14 @@
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
     <color name="custom">#32a8ca</color>
-    <color name="silver">#5EB1B8BA</color>
+    <color name="colorMsgLeft">#5EB1B8BA</color>
+    <color name="colorMsgRight">#4CAF50</color>
 
+    <color name="colorPrimary">#00695C</color>
+
+    <color name="colorMsgTextLeft">#000000</color>
+    <color name="colorMsgTextRight">#FFFFFF</color>
+
+    <color name="colorMsgTimeLeft">#9E9E9E</color>
+    <color name="colorMsgTimeRight">#E0E0E0</color>
 </resources>

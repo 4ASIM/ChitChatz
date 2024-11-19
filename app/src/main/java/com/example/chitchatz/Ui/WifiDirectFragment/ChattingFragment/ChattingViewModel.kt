@@ -1,4 +1,4 @@
-package com.example.chitchatz
+package com.example.chitchatz.Ui.WifiDirectFragment.ChattingFragment
 
 import androidx.lifecycle.ViewModel
 

@@ -11,15 +11,20 @@ import java.io.*
 import java.net.ServerSocket
 import java.net.Socket
 import kotlin.concurrent.thread
+import android.widget.ArrayAdapter
+import android.widget.ListView
 
 class Message : AppCompatActivity() {
 
-    private lateinit var incomingTextView: TextView
+    private lateinit var messageListView: ListView
     private lateinit var sendEditText: EditText
     private lateinit var sendButton: Button
 
     private var socket: Socket? = null
     private var serverSocket: ServerSocket? = null
+
+    private val messages = mutableListOf<String>()
+    private lateinit var adapter: ArrayAdapter<String>
 
     companion object {
         const val PORT = 8888
@@ -30,9 +35,13 @@ class Message : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_message)
 
-        incomingTextView = findViewById(R.id.text_incoming)
+        messageListView = findViewById(R.id.message_list)
         sendEditText = findViewById(R.id.text_send)
         sendButton = findViewById(R.id.btn_send)
+
+        // Initialize adapter
+        adapter = ArrayAdapter(this, android.R.layout.simple_list_item_1, messages)
+        messageListView.adapter = adapter
 
         val isGroupOwner = intent.getBooleanExtra("isGroupOwner", false)
         val groupOwnerAddress = intent.getStringExtra("groupOwnerAddress")
@@ -45,7 +54,11 @@ class Message : AppCompatActivity() {
 
         sendButton.setOnClickListener {
             val message = sendEditText.text.toString()
-            sendMessage(message)
+            if (message.isNotEmpty()) {
+                sendMessage(message)
+                addMessage("Me: $message")
+                sendEditText.text.clear()
+            }
         }
     }
 
@@ -85,9 +98,6 @@ class Message : AppCompatActivity() {
                     writer.newLine()
                     writer.flush()
                 }
-                runOnUiThread {
-                    sendEditText.text.clear()
-                }
                 Log.d(TAG, "Message sent: $message")
             } catch (e: IOException) {
                 Log.e(TAG, "Error sending message", e)
@@ -103,7 +113,7 @@ class Message : AppCompatActivity() {
                     while (true) {
                         val message = reader.readLine() ?: break
                         runOnUiThread {
-                            incomingTextView.text = message
+                            addMessage("Them: $message")
                         }
                         Log.d(TAG, "Message received: $message")
                     }
@@ -112,6 +122,12 @@ class Message : AppCompatActivity() {
                 Log.e(TAG, "Error receiving message", e)
             }
         }
+    }
+
+    private fun addMessage(message: String) {
+        messages.add(message)
+        adapter.notifyDataSetChanged()
+        messageListView.smoothScrollToPosition(messages.size - 1)
     }
 
     override fun onDestroy() {
