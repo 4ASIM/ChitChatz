@@ -1,134 +1,157 @@
 package com.example.chitchatz.Ui.WifiDirectFragment
-
+import android.Manifest
+import android.content.BroadcastReceiver
 import android.content.Context
-import android.net.wifi.WifiManager
+import android.content.Intent
+import android.content.IntentFilter
+import android.content.pm.PackageManager
+import android.net.wifi.p2p.WifiP2pConfig
+import android.net.wifi.p2p.WifiP2pDevice
+import android.net.wifi.p2p.WifiP2pDeviceList
+import android.net.wifi.p2p.WifiP2pInfo
+import android.net.wifi.p2p.WifiP2pManager
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Button
-import android.widget.Toast
+import android.widget.*
+import androidx.core.app.ActivityCompat
 import androidx.fragment.app.Fragment
-import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
+import com.example.chitchatz.ChatActivity
 import com.example.chitchatz.R
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
-import java.net.InetAddress
 
-class WiFiDirectFragment : Fragment() {
+class WiFiDirectFragment : Fragment(), WifiP2pManager.PeerListListener, WifiP2pManager.ConnectionInfoListener {
 
-    private lateinit var recyclerView: RecyclerView
-    private lateinit var peerListAdapter: WiFiPeerListAdapter
-    private lateinit var startDiscoveryButton: Button
+    private val TAG = this::class.java.simpleName
 
-    private val devices = mutableListOf<String>() // List to hold discovered device IPs
+    private lateinit var mManager: WifiP2pManager
+    private lateinit var mChannel: WifiP2pManager.Channel
+    private lateinit var mReceiver: BroadcastReceiver
+    private lateinit var mIntentFilter: IntentFilter
+
+    private val deviceList = mutableListOf<WifiP2pDevice>()
+    private val deviceNames = mutableListOf<String>()
+    private lateinit var deviceListView: ListView
 
     override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
+        inflater: LayoutInflater,
+        container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        return inflater.inflate(R.layout.fragment_wi_fi_direct, container, false)
-    }
+        val view = inflater.inflate(R.layout.fragment_wi_fi_direct, container, false)
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
+        deviceListView = view.findViewById(R.id.device_list)
 
-        recyclerView = view.findViewById(R.id.peer_list)
-        startDiscoveryButton = view.findViewById(R.id.start_discovery_button)
-        peerListAdapter = WiFiPeerListAdapter(devices)
+        mManager = requireContext().getSystemService(Context.WIFI_P2P_SERVICE) as WifiP2pManager
+        mChannel = mManager.initialize(requireContext(), requireActivity().mainLooper, null)
+        mReceiver = WiFiDirectBroadcastReceiver(mManager, mChannel, this)
 
-        recyclerView.layoutManager = LinearLayoutManager(requireContext())
-        recyclerView.adapter = peerListAdapter
-
-        startDiscoveryButton.setOnClickListener {
-            discoverDevices()
+        mIntentFilter = IntentFilter().apply {
+            addAction(WifiP2pManager.WIFI_P2P_STATE_CHANGED_ACTION)
+            addAction(WifiP2pManager.WIFI_P2P_PEERS_CHANGED_ACTION)
+            addAction(WifiP2pManager.WIFI_P2P_CONNECTION_CHANGED_ACTION)
+            addAction(WifiP2pManager.WIFI_P2P_THIS_DEVICE_CHANGED_ACTION)
         }
-    }
 
-    private fun discoverDevices() {
-        Toast.makeText(requireContext(), "Scanning for devices...", Toast.LENGTH_SHORT).show()
+        val btnDiscover: Button = view.findViewById(R.id.start_discovery_button)
+        btnDiscover.setOnClickListener {
+            if (ActivityCompat.checkSelfPermission(
+                    requireContext(),
+                    Manifest.permission.ACCESS_FINE_LOCATION
+                ) != PackageManager.PERMISSION_GRANTED || ActivityCompat.checkSelfPermission(
+                    requireContext(),
+                    Manifest.permission.NEARBY_WIFI_DEVICES
+                ) != PackageManager.PERMISSION_GRANTED
+            ) {
 
-        CoroutineScope(Dispatchers.IO).launch {
-            try {
-                val discoveredDevices = scanLocalNetwork()
-                withContext(Dispatchers.Main) {
-                    devices.clear()
-                    devices.addAll(discoveredDevices)
-                    peerListAdapter.notifyDataSetChanged()
-
-                    if (devices.isEmpty()) {
-                        Toast.makeText(requireContext(), "No devices found", Toast.LENGTH_SHORT).show()
-                    } else {
-                        Toast.makeText(requireContext(), "Devices found: ${devices.size}", Toast.LENGTH_SHORT).show()
-                    }
+            }
+            mManager.discoverPeers(mChannel, object : WifiP2pManager.ActionListener {
+                override fun onSuccess() {
+                    deviceList.clear()
+                    deviceNames.clear()
+                    Toast.makeText(requireContext(), "Discovery started.", Toast.LENGTH_SHORT).show()
                 }
-            } catch (e: Exception) {
-                Log.e("WiFiScan", "Error during discovery: ${e.message}")
-                withContext(Dispatchers.Main) {
-                    Toast.makeText(requireContext(), "Error during scanning", Toast.LENGTH_SHORT).show()
+
+                override fun onFailure(reasonCode: Int) {
+                    Toast.makeText(requireContext(), "Discovery failed: $reasonCode", Toast.LENGTH_SHORT).show()
                 }
-            }
-        }
-    }
-
-    private fun scanLocalNetwork(): List<String> {
-        val connectedDevices = mutableListOf<String>()
-        val wifiManager = requireContext().getSystemService(Context.WIFI_SERVICE) as WifiManager
-        val dhcpInfo = wifiManager.dhcpInfo
-
-        // Convert gateway IP to network byte order
-        val gatewayIp = Integer.reverseBytes(dhcpInfo.gateway)
-        val baseIp = gatewayIp and 0xFFFFFF00.toInt()
-
-        Log.d("WiFiScan", "Scanning subnet: ${inetAddressToString(baseIp)}.0/24")
-
-        for (i in 1..100) {
-            val targetIp = baseIp or i
-            val ipAddress = byteArrayOf(
-                (targetIp shr 24 and 0xFF).toByte(),
-                (targetIp shr 16 and 0xFF).toByte(),
-                (targetIp shr 8 and 0xFF).toByte(),
-                (targetIp and 0xFF).toByte()
-            )
-            val address = InetAddress.getByAddress(ipAddress)
-            Log.d("WiFiScan", "Pinging IP: ${address.hostAddress}")
-
-            // Check if the device is reachable
-            if (address.isReachable(1000)) {
-                val deviceName = getDeviceName(address) ?: address.hostAddress
-                Log.d("WiFiScan", "Device found: $deviceName")
-                connectedDevices.add(deviceName)
-            } else {
-                Log.d("WiFiScan", "Device at ${address.hostAddress} is not reachable.")
-            }
+            })
         }
 
-        Log.d("WiFiScan", "Connected devices: $connectedDevices")
-        return connectedDevices
+        deviceListView.setOnItemClickListener { _, _, position, _ ->
+            connectToDevice(position)
+        }
+
+        return view
     }
 
-    private fun getDeviceName(address: InetAddress): String? {
-        return try {
+    override fun onResume() {
+        super.onResume()
+        requireContext().registerReceiver(mReceiver, mIntentFilter)
+    }
 
-            val canonicalHostName = address.canonicalHostName
-            if (canonicalHostName != null && canonicalHostName != address.hostAddress) {
-                canonicalHostName
-            } else {
-                null
+    override fun onPause() {
+        super.onPause()
+        requireContext().unregisterReceiver(mReceiver)
+    }
+
+    override fun onPeersAvailable(peerList: WifiP2pDeviceList) {
+        deviceList.clear()
+        deviceList.addAll(peerList.deviceList)
+
+        deviceNames.clear()
+        deviceList.forEach { device ->
+            deviceNames.add(device.deviceName)
+        }
+
+        val adapter = ArrayAdapter(requireContext(), android.R.layout.simple_list_item_1, deviceNames)
+        deviceListView.adapter = adapter
+    }
+
+    private fun connectToDevice(position: Int) {
+        val toConnect = deviceList[position]
+        val config = WifiP2pConfig().apply {
+            deviceAddress = toConnect.deviceAddress
+            groupOwnerIntent = 15
+        }
+
+        if (ActivityCompat.checkSelfPermission(
+                requireContext(),
+                Manifest.permission.ACCESS_FINE_LOCATION
+            ) != PackageManager.PERMISSION_GRANTED || ActivityCompat.checkSelfPermission(
+                requireContext(),
+                Manifest.permission.NEARBY_WIFI_DEVICES
+            ) != PackageManager.PERMISSION_GRANTED
+        ) {
+
+            return
+        }
+        mManager.connect(mChannel, config, object : WifiP2pManager.ActionListener {
+            override fun onSuccess() {
+                Log.i(TAG, "Successfully connected to ${toConnect.deviceName}")
             }
-        } catch (e: Exception) {
-            Log.e("WiFiScan", "Error resolving hostname: ${e.message}")
-            null
+
+            override fun onFailure(reason: Int) {
+                Log.e(TAG, "Connection failed: $reason")
+            }
+        })
+    }
+
+    override fun onConnectionInfoAvailable(info: WifiP2pInfo) {
+        if (info.isGroupOwner) {
+            Toast.makeText(requireContext(), "You are the group owner!", Toast.LENGTH_LONG).show()
+            val chatIntent = Intent(requireContext(), ChatActivity::class.java).apply {
+                putExtra("Owner?", true)
+            }
+            startActivity(chatIntent)
+        } else {
+            Toast.makeText(requireContext(), "Group owner is: ${info.groupOwnerAddress.hostAddress}", Toast.LENGTH_LONG).show()
+            val chatIntent = Intent(requireContext(), ChatActivity::class.java).apply {
+                putExtra("Owner?", false)
+                putExtra("Owner Address", info.groupOwnerAddress.hostAddress)
+            }
+            startActivity(chatIntent)
         }
     }
-
-    private fun inetAddressToString(ip: Int): String {
-        return "${ip shr 24 and 0xFF}.${ip shr 16 and 0xFF}.${ip shr 8 and 0xFF}.${ip and 0xFF}"
-    }
-
-
 }

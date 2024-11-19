@@ -1,5 +1,6 @@
 package com.example.chitchatz.Ui.WifiDirectFragment
 
+import android.net.wifi.p2p.WifiP2pDevice
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -7,7 +8,7 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.example.chitchatz.R
 
-class WiFiPeerListAdapter(private val devices: List<String>) :
+class WiFiPeerListAdapter(private var devices: MutableList<WifiP2pDevice>) :
     RecyclerView.Adapter<WiFiPeerListAdapter.DeviceViewHolder>() {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): DeviceViewHolder {
@@ -24,8 +25,16 @@ class WiFiPeerListAdapter(private val devices: List<String>) :
     inner class DeviceViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         private val deviceTextView: TextView = itemView.findViewById(R.id.device_name)
 
-        fun bind(deviceIp: String) {
-            deviceTextView.text = deviceIp
+        fun bind(device: WifiP2pDevice) {
+            // Set the device's name in the TextView
+            deviceTextView.text = device.deviceName
         }
+    }
+
+    // Method to update the device list dynamically
+    fun updateList(newDevices: List<WifiP2pDevice>) {
+        devices.clear()
+        devices.addAll(newDevices)
+        notifyDataSetChanged() // Notify the adapter to refresh the RecyclerView
     }
 }
