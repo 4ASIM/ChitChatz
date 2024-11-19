@@ -37,4 +37,9 @@
         android:name="com.example.chitchatz.ChatFragment"
         android:label="fragment_chat"
         tools:layout="@layout/fragment_chat" />
+    <fragment
+        android:id="@+id/chattingFragment"
+        android:name="com.example.chitchatz.ChattingFragment"
+        android:label="fragment_chatting"
+        tools:layout="@layout/fragment_chatting" />
 </navigation>

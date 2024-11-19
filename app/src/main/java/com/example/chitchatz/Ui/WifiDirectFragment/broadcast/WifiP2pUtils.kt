@@ -1,4 +1,4 @@
-package com.example.chitchatz.Ui.WifiDirectFragment
+package com.example.chitchatz.Ui.WifiDirectFragment.broadcast
 
 import android.net.wifi.p2p.WifiP2pDevice
 object WifiP2pUtils {

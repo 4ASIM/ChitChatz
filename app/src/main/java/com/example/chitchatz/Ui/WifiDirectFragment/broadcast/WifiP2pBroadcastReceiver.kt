@@ -1,10 +1,11 @@
-package com.example.chitchatz.Ui.WifiDirectFragment
+package com.example.chitchatz.Ui.WifiDirectFragment.broadcast
 
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.net.wifi.p2p.WifiP2pManager
 import android.util.Log
+import com.example.chitchatz.Ui.WifiDirectFragment.Message
 
 class WifiP2pBroadcastReceiver(
     private val manager: WifiP2pManager,

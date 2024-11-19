@@ -7,22 +7,13 @@ import android.view.ViewGroup
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.example.chitchatz.R
+import com.example.chitchatz.Ui.WifiDirectFragment.broadcast.WifiP2pUtils
 
-/**
- * @Author: leavesCZY
- * @Date: 2024/4/1 11:27
- * @Desc:
- */
-interface OnItemClickListener {
 
-    fun onItemClick(position: Int)
-
-}
-
-class DeviceAdapter(private val wifiP2pDeviceList: List<WifiP2pDevice>) :
-    RecyclerView.Adapter<DeviceAdapter.ViewHolder>() {
-
-    var onItemClickListener: OnItemClickListener? = null
+class DeviceAdapter(
+    private var wifiP2pDeviceList: List<WifiP2pDevice>,
+    private val onDeviceClick: (WifiP2pDevice) -> Unit
+) : RecyclerView.Adapter<DeviceAdapter.ViewHolder>() {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         val view = LayoutInflater.from(parent.context).inflate(R.layout.item_wifi_peer, parent, false)
@@ -31,31 +22,26 @@ class DeviceAdapter(private val wifiP2pDeviceList: List<WifiP2pDevice>) :
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val device = wifiP2pDeviceList[position]
-        holder.tvDeviceName.text = device.deviceName
-        holder.tvDeviceAddress.text = device.deviceAddress
-        holder.tvDeviceDetails.text = WifiP2pUtils.getDeviceStatus(deviceStatus = device.status)
-        holder.itemView.setOnClickListener {
-            onItemClickListener?.onItemClick(position = position)
-        }
+        holder.bind(device)
+        holder.itemView.setOnClickListener { onDeviceClick(device) }
     }
 
-    override fun getItemCount(): Int {
-        return wifiP2pDeviceList.size
+    override fun getItemCount(): Int = wifiP2pDeviceList.size
+
+    fun updateDevices(newDeviceList: List<WifiP2pDevice>) {
+        wifiP2pDeviceList = newDeviceList
+        notifyDataSetChanged()
     }
 
     class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
+        private val tvDeviceName: TextView = itemView.findViewById(R.id.tvDeviceName)
+        private val tvDeviceAddress: TextView = itemView.findViewById(R.id.tvDeviceAddress)
+        private val tvDeviceDetails: TextView = itemView.findViewById(R.id.tvDeviceDetails)
 
-        val tvDeviceName: TextView
-
-        val tvDeviceAddress: TextView
-
-        val tvDeviceDetails: TextView
-
-        init {
-            tvDeviceName = itemView.findViewById(R.id.tvDeviceName)
-            tvDeviceAddress = itemView.findViewById(R.id.tvDeviceAddress)
-            tvDeviceDetails = itemView.findViewById(R.id.tvDeviceDetails)
+        fun bind(device: WifiP2pDevice) {
+            tvDeviceName.text = device.deviceName
+            tvDeviceAddress.text = device.deviceAddress
+            tvDeviceDetails.text = WifiP2pUtils.getDeviceStatus(device.status)
         }
     }
-
 }
