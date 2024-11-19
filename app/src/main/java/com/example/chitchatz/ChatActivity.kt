@@ -1,13 +1,15 @@
 package com.example.chitchatz
 
-import android.content.Intent
 import android.os.Bundle
 import android.os.Handler
+import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
-import android.view.View
 import android.widget.Button
 import android.widget.EditText
 import android.widget.TextView
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import java.io.*
 import java.net.InetAddress
 import java.net.ServerSocket
@@ -26,6 +28,8 @@ class ChatActivity : AppCompatActivity() {
     private lateinit var send: Button
 
     private var owner: Boolean = false
+
+    private lateinit var output: PrintWriter
 
     companion object {
         const val SERVERPORT = 6000
@@ -56,13 +60,21 @@ class ChatActivity : AppCompatActivity() {
 
         // Send the text to the server
         send.setOnClickListener {
-            try {
-                val message = yourMessage.text.toString()
-                PrintWriter(BufferedWriter(OutputStreamWriter(socket!!.getOutputStream())), true).println(message)
-            } catch (e: IOException) {
-                e.printStackTrace()
-            } catch (e: Exception) {
-                e.printStackTrace()
+            val message = yourMessage.text.toString()
+            if (message.isNotBlank()) {
+                CoroutineScope(Dispatchers.IO).launch {
+                    try {
+                        if (::output.isInitialized) {
+                            output.println(message)
+                            output.flush() // Ensure the message is sent
+                        } else {
+                            Log.e("ChatActivity", "Output stream not initialized")
+                        }
+                    } catch (e: IOException) {
+                        e.printStackTrace()
+                    }
+                }
+                yourMessage.text.clear()
             }
         }
     }
@@ -70,7 +82,9 @@ class ChatActivity : AppCompatActivity() {
     override fun onStop() {
         super.onStop()
         try {
+            serverThread?.interrupt()
             serverSocket?.close()
+            socket?.close()
         } catch (e: IOException) {
             e.printStackTrace()
         }
@@ -80,7 +94,6 @@ class ChatActivity : AppCompatActivity() {
     inner class ServerThread : Runnable {
         override fun run() {
             try {
-                // Create a socket on port 6000
                 serverSocket = ServerSocket(SERVERPORT)
             } catch (e: IOException) {
                 e.printStackTrace()
@@ -88,9 +101,8 @@ class ChatActivity : AppCompatActivity() {
 
             while (!Thread.currentThread().isInterrupted) {
                 try {
-                    // Start listening for messages
-                    val socket = serverSocket!!.accept()
-                    val commThread = CommunicationThread(socket)
+                    val clientSocket = serverSocket!!.accept()
+                    val commThread = CommunicationThread(clientSocket)
                     Thread(commThread).start()
                 } catch (e: IOException) {
                     e.printStackTrace()
@@ -101,23 +113,13 @@ class ChatActivity : AppCompatActivity() {
 
     // Handles received messages from clients
     inner class CommunicationThread(private val clientSocket: Socket) : Runnable {
-        private val input: BufferedReader?
-
-        init {
-            input = try {
-                BufferedReader(InputStreamReader(clientSocket.getInputStream()))
-            } catch (e: IOException) {
-                e.printStackTrace()
-                null
-            }
-        }
-
         override fun run() {
-            while (!Thread.currentThread().isInterrupted) {
+            CoroutineScope(Dispatchers.IO).launch {
                 try {
-                    val message = input?.readLine()
-                    message?.let {
-                        updateConversationHandler.post(UpdateUIThread(it))
+                    val input = BufferedReader(InputStreamReader(clientSocket.getInputStream()))
+                    var message: String?
+                    while (input.readLine().also { message = it } != null) {
+                        updateConversationHandler.post(UpdateUIThread(message!!))
                     }
                 } catch (e: IOException) {
                     e.printStackTrace()
@@ -129,16 +131,32 @@ class ChatActivity : AppCompatActivity() {
     // Handles showing received messages on screen
     inner class UpdateUIThread(private val msg: String) : Runnable {
         override fun run() {
-            receivedText.append("Gelen Mesaj: $msg\n")
+            receivedText.append("Incoming Message: $msg\n")
         }
     }
 
-    // Handles connection to server
     inner class ClientThread : Runnable {
         override fun run() {
             try {
                 val serverAddress = InetAddress.getByName(SERVER_IP)
                 socket = Socket(serverAddress, SERVERPORT)
+
+                output = PrintWriter(BufferedWriter(OutputStreamWriter(socket!!.getOutputStream())), true)
+
+                val input = BufferedReader(InputStreamReader(socket!!.getInputStream()))
+                Thread {
+                    try {
+                        var message: String?
+                        while (input.readLine().also { message = it } != null) {
+                            updateConversationHandler.post(UpdateUIThread(message!!))
+                        }
+                    } catch (e: IOException) {
+                        e.printStackTrace()
+                    }
+                }.start()
+
+                output.println("CONNECTED: ${socket!!.localAddress.hostAddress}")
+                output.flush() // Ensure the message is sent
             } catch (e: UnknownHostException) {
                 e.printStackTrace()
             } catch (e: IOException) {

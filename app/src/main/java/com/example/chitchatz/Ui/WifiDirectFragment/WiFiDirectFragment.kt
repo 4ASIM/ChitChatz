@@ -5,6 +5,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.content.pm.PackageManager
+import android.net.wifi.WpsInfo
 import android.net.wifi.p2p.WifiP2pConfig
 import android.net.wifi.p2p.WifiP2pDevice
 import android.net.wifi.p2p.WifiP2pDeviceList
@@ -24,7 +25,7 @@ import com.example.chitchatz.R
 class WiFiDirectFragment : Fragment(), WifiP2pManager.PeerListListener, WifiP2pManager.ConnectionInfoListener {
 
     private val TAG = this::class.java.simpleName
-
+    private var isSender: Boolean = false
     private lateinit var mManager: WifiP2pManager
     private lateinit var mChannel: WifiP2pManager.Channel
     private lateinit var mReceiver: BroadcastReceiver
@@ -70,11 +71,16 @@ class WiFiDirectFragment : Fragment(), WifiP2pManager.PeerListListener, WifiP2pM
                 override fun onSuccess() {
                     deviceList.clear()
                     deviceNames.clear()
-                    Toast.makeText(requireContext(), "Discovery started.", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(requireContext(), "Discovery started.", Toast.LENGTH_SHORT)
+                        .show()
                 }
 
                 override fun onFailure(reasonCode: Int) {
-                    Toast.makeText(requireContext(), "Discovery failed: $reasonCode", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(
+                        requireContext(),
+                        "Discovery failed: $reasonCode",
+                        Toast.LENGTH_SHORT
+                    ).show()
                 }
             })
         }
@@ -105,7 +111,8 @@ class WiFiDirectFragment : Fragment(), WifiP2pManager.PeerListListener, WifiP2pM
             deviceNames.add(device.deviceName)
         }
 
-        val adapter = ArrayAdapter(requireContext(), android.R.layout.simple_list_item_1, deviceNames)
+        val adapter =
+            ArrayAdapter(requireContext(), android.R.layout.simple_list_item_1, deviceNames)
         deviceListView.adapter = adapter
     }
 
@@ -113,9 +120,11 @@ class WiFiDirectFragment : Fragment(), WifiP2pManager.PeerListListener, WifiP2pM
         val toConnect = deviceList[position]
         val config = WifiP2pConfig().apply {
             deviceAddress = toConnect.deviceAddress
-            groupOwnerIntent = 15
+            wps.setup = WpsInfo.PBC
+            groupOwnerIntent = 15 // High priority to become group owner
         }
-
+        isSender = true
+        ensurePermissions()
         if (ActivityCompat.checkSelfPermission(
                 requireContext(),
                 Manifest.permission.ACCESS_FINE_LOCATION
@@ -124,34 +133,77 @@ class WiFiDirectFragment : Fragment(), WifiP2pManager.PeerListListener, WifiP2pM
                 Manifest.permission.NEARBY_WIFI_DEVICES
             ) != PackageManager.PERMISSION_GRANTED
         ) {
-
+            Toast.makeText(requireContext(), "Permissions not granted", Toast.LENGTH_SHORT).show()
             return
         }
+
         mManager.connect(mChannel, config, object : WifiP2pManager.ActionListener {
             override fun onSuccess() {
-                Log.i(TAG, "Successfully connected to ${toConnect.deviceName}")
+                Log.i(TAG, "Connection initiated to ${toConnect.deviceName}")
+                Toast.makeText(
+                    requireContext(),
+                    "Connecting to ${toConnect.deviceName}",
+                    Toast.LENGTH_SHORT
+                ).show()
             }
 
             override fun onFailure(reason: Int) {
                 Log.e(TAG, "Connection failed: $reason")
+                Toast.makeText(requireContext(), "Connection failed: $reason", Toast.LENGTH_SHORT)
+                    .show()
+                isSender = false
             }
         })
     }
+    private fun ensurePermissions() {
+        if (ActivityCompat.checkSelfPermission(
+                requireContext(),
+                Manifest.permission.ACCESS_FINE_LOCATION
+            ) != PackageManager.PERMISSION_GRANTED ||
+            ActivityCompat.checkSelfPermission(
+                requireContext(),
+                Manifest.permission.NEARBY_WIFI_DEVICES
+            ) != PackageManager.PERMISSION_GRANTED
+        ) {
+            ActivityCompat.requestPermissions(
+                requireActivity(),
+                arrayOf(
+                    Manifest.permission.ACCESS_FINE_LOCATION,
+                    Manifest.permission.NEARBY_WIFI_DEVICES
+                ),
+                1001
+            )
+        }
+    }
 
     override fun onConnectionInfoAvailable(info: WifiP2pInfo) {
-        if (info.isGroupOwner) {
-            Toast.makeText(requireContext(), "You are the group owner!", Toast.LENGTH_LONG).show()
+        if (info.groupFormed) {
+            val isGroupOwner = info.isGroupOwner
             val chatIntent = Intent(requireContext(), ChatActivity::class.java).apply {
-                putExtra("Owner?", true)
+                putExtra("Owner?", isGroupOwner)
+                if (!isGroupOwner) {
+                    putExtra("Owner Address", info.groupOwnerAddress.hostAddress)
+                }
             }
             startActivity(chatIntent)
+            Log.i(TAG, "You are the sender and the group owner")
+            Toast.makeText(requireContext(), "Connection established. You are the sender!", Toast.LENGTH_LONG).show()
         } else {
-            Toast.makeText(requireContext(), "Group owner is: ${info.groupOwnerAddress.hostAddress}", Toast.LENGTH_LONG).show()
-            val chatIntent = Intent(requireContext(), ChatActivity::class.java).apply {
-                putExtra("Owner?", false)
-                putExtra("Owner Address", info.groupOwnerAddress.hostAddress)
-            }
-            startActivity(chatIntent)
+            Toast.makeText(
+                requireContext(),
+                "Connection failed. No group formed.",
+                Toast.LENGTH_LONG
+            ).show()
+            Log.i(TAG, "Connected as a client to the sender")
+            Toast.makeText(requireContext(), "You are the receiver. Connected to group owner: ${info.groupOwnerAddress.hostAddress}", Toast.LENGTH_LONG).show()
         }
+        startChatActivity(info.isGroupOwner, info.groupOwnerAddress?.hostAddress)
+    }
+    private fun startChatActivity(isOwner: Boolean, groupOwnerAddress: String?) {
+        val chatIntent = Intent(requireContext(), ChatActivity::class.java).apply {
+            putExtra("Owner?", isOwner)
+            putExtra("Owner Address", groupOwnerAddress)
+        }
+        startActivity(chatIntent)
     }
 }
