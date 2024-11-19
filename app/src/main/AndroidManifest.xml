@@ -20,6 +20,9 @@
         android:theme="@style/Theme.ChitChatz"
         tools:targetApi="31">
         <activity
+            android:name=".Ui.WifiDirectFragment.Message"
+            android:exported="false" />
+        <activity
             android:name=".ChatActivity"
             android:exported="false" />
         <activity
