@@ -1,12 +1,11 @@
-<LinearLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/activity_chat"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:orientation="vertical"
     android:padding="10dp"
-    tools:context=".Ui.WifiDirectFragment.Message"
-    android:orientation="vertical">
+    tools:context=".Ui.WifiDirectFragment.Message">
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/message_list"
@@ -15,17 +14,47 @@
         android:layout_weight="1"
         android:divider="@android:color/transparent"
         android:dividerHeight="10dp"
-        android:scrollbars="vertical"/>
+        android:scrollbars="vertical" />
 
-    <EditText
-        android:id="@+id/text_send"
+    <ScrollView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="Type your message"/>
+        android:fillViewport="true">
 
-    <Button
-        android:id="@+id/btn_send"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="SEND"/>
+        <LinearLayout
+            android:id="@+id/linearLayout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentStart="true"
+            android:layout_alignParentBottom="true"
+            android:background="@color/white"
+            android:elevation="4dp"
+            android:orientation="horizontal"
+            android:paddingStart="8dp"
+            android:paddingEnd="8dp">
+
+            <EditText
+                android:id="@+id/text_send"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
+                android:layout_weight="1"
+                android:background="@color/white"
+                android:hint="type_a_message"
+                android:inputType="textMultiLine"
+                android:maxLines="5"
+                android:scrollbars="vertical" />
+
+            <ImageButton
+                android:id="@+id/btn_send"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
+                android:layout_marginTop="4dp"
+                android:layout_marginBottom="4dp"
+                android:background="@drawable/send_alt_1_svgrepo_com"
+                android:padding="8dp" />
+        </LinearLayout>
+    </ScrollView>
+
 </LinearLayout>

@@ -1,18 +1,13 @@
 package com.example.chitchatz.Ui.WifiDirectFragment
-import android.graphics.Color
+
 import android.os.Bundle
-import android.text.TextUtils
 import android.util.Log
-import android.view.Gravity
-import android.widget.Button
-import android.widget.EditText
-import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
 import com.example.chitchatz.R
 import com.example.chitchatz.Ui.WifiDirectFragment.ChattingFragment.MessageAdapter
 import com.example.chitchatz.Ui.WifiDirectFragment.ChattingFragment.MessageItem
+import com.example.chitchatz.databinding.ActivityMessageBinding
 import java.io.*
 import java.net.ServerSocket
 import java.net.Socket
@@ -20,15 +15,12 @@ import kotlin.concurrent.thread
 
 class Message : AppCompatActivity() {
 
-    private lateinit var messageRecyclerView: RecyclerView
-    private lateinit var sendEditText: EditText
-    private lateinit var sendButton: Button
-
+    private lateinit var binding: ActivityMessageBinding
+    private lateinit var adapter: MessageAdapter
     private var socket: Socket? = null
     private var serverSocket: ServerSocket? = null
 
     private val messages = mutableListOf<MessageItem>()
-    private lateinit var adapter: MessageAdapter
 
     companion object {
         const val PORT = 8888
@@ -37,15 +29,12 @@ class Message : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_message)
+        binding = ActivityMessageBinding.inflate(layoutInflater)
+        setContentView(binding.root)
 
-        messageRecyclerView = findViewById(R.id.message_list)
-        sendEditText = findViewById(R.id.text_send)
-        sendButton = findViewById(R.id.btn_send)
-
-        messageRecyclerView.layoutManager = LinearLayoutManager(this)
+        binding.messageList.layoutManager = LinearLayoutManager(this)
         adapter = MessageAdapter(messages)
-        messageRecyclerView.adapter = adapter
+        binding.messageList.adapter = adapter
 
         val isGroupOwner = intent.getBooleanExtra("isGroupOwner", false)
         val groupOwnerAddress = intent.getStringExtra("groupOwnerAddress")
@@ -56,12 +45,12 @@ class Message : AppCompatActivity() {
             setupClient(groupOwnerAddress!!)
         }
 
-        sendButton.setOnClickListener {
-            val message = sendEditText.text.toString()
+        binding.btnSend.setOnClickListener {
+            val message = binding.textSend.text.toString()
             if (message.isNotEmpty()) {
                 sendMessage(message)
                 addMessage(message, true) // True for sent messages ("Me")
-                sendEditText.text.clear()
+                binding.textSend.text.clear()
             }
         }
     }
@@ -132,7 +121,7 @@ class Message : AppCompatActivity() {
         val messageItem = MessageItem(message, isMe)
         messages.add(messageItem)
         adapter.notifyItemInserted(messages.size - 1)
-        messageRecyclerView.scrollToPosition(messages.size - 1)
+        binding.messageList.scrollToPosition(messages.size - 1)
     }
 
     override fun onDestroy() {
