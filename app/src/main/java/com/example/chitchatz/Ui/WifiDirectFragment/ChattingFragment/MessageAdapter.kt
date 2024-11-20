@@ -27,14 +27,12 @@ class MessageAdapter(private val messages: List<MessageItem>) :
         val messageItem = messages[position]
         holder.messageTextView.text = messageItem.message
 
-        // If the message is from "Me", it will be green and on the left
         if (messageItem.isMe) {
-            holder.messageLayout.setBackgroundColor(Color.parseColor("#A5D6A7")) // Green
+            holder.messageLayout.setBackgroundResource(R.drawable.bg_message_sent)
             holder.messageTextView.setTextColor(Color.WHITE)
             holder.messageLayout.gravity = Gravity.START
         } else {
-            // If the message is from "Them", it will be silver and on the right
-            holder.messageLayout.setBackgroundColor(Color.parseColor("#C0C0C0")) // Silver
+            holder.messageLayout.setBackgroundResource(R.drawable.bg_message_received)
             holder.messageTextView.setTextColor(Color.BLACK)
             holder.messageLayout.gravity = Gravity.END
         }
