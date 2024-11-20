@@ -31,12 +31,12 @@
         android:id="@+id/wiFiDirectFragment"
         android:name="com.example.chitchatz.Ui.WifiDirectFragment.WiFiDirectFragment"
         android:label="fragment_wi_fi_direct"
-        tools:layout="@layout/fragment_wi_fi_direct" />
-    <fragment
-        android:id="@+id/chatFragment"
-        android:name="com.example.chitchatz.ChatFragment"
-        android:label="fragment_chat"
-        tools:layout="@layout/fragment_chat" />
+        tools:layout="@layout/fragment_wi_fi_direct" >
+        <action
+            android:id="@+id/action_wiFiDirectFragment_to_chattingFragment"
+            app:destination="@id/chattingFragment" />
+    </fragment>
+
     <fragment
         android:id="@+id/chattingFragment"
         android:name="com.example.chitchatz.Ui.WifiDirectFragment.ChattingFragment.ChattingFragment"

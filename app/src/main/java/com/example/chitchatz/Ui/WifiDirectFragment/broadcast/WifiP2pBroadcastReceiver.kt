@@ -4,8 +4,11 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.net.wifi.p2p.WifiP2pManager
+import android.os.Bundle
 import android.util.Log
-import com.example.chitchatz.Ui.WifiDirectFragment.Message
+import androidx.navigation.findNavController
+import com.example.chitchatz.MainActivity
+import com.example.chitchatz.R
 
 class WifiP2pBroadcastReceiver(
     private val manager: WifiP2pManager,
@@ -37,13 +40,14 @@ class WifiP2pBroadcastReceiver(
                             val groupOwnerAddress = info.groupOwnerAddress?.hostAddress ?: ""
                             Log.d("WiFiP2P", "Group formed: Owner=$isGroupOwner, Address=$groupOwnerAddress")
 
-                            // Start the Message activity
-                            val messageIntent = Intent(context, Message::class.java).apply {
-                                putExtra("isGroupOwner", isGroupOwner)
-                                putExtra("groupOwnerAddress", groupOwnerAddress)
-                                flags = Intent.FLAG_ACTIVITY_NEW_TASK // Needed for BroadcastReceiver context
+                            val navController = (context as? MainActivity)?.findNavController(R.id.nav_host_fragment)
+                            val bundle = Bundle().apply {
+                                putBoolean("isGroupOwner", isGroupOwner)
+                                putString("groupOwnerAddress", groupOwnerAddress)
                             }
-                            context.startActivity(messageIntent)
+
+
+                            navController?.navigate(R.id.action_wiFiDirectFragment_to_chattingFragment, bundle)
                         }
                     }
                 } else {
