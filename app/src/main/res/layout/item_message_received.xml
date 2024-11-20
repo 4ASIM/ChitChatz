@@ -1,9 +1,9 @@
+<!-- item_message_received.xml -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/message_layout"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:padding="8dp"
-    android:orientation="horizontal">
+    android:gravity="start"> <!-- Align to the left -->
 
     <TextView
         android:id="@+id/message_text"
@@ -12,5 +12,6 @@
         android:maxWidth="250dp"
         android:padding="8dp"
         android:textColor="@android:color/black"
+        android:background="@drawable/bg_message_received"
         android:textSize="16sp"/>
 </LinearLayout>

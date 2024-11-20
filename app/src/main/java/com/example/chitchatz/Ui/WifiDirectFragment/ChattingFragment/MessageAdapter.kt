@@ -11,32 +11,44 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.chitchatz.R
 
 class MessageAdapter(private val messages: List<MessageItem>) :
-    RecyclerView.Adapter<MessageAdapter.MessageViewHolder>() {
+    RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
-    inner class MessageViewHolder(view: View) : RecyclerView.ViewHolder(view) {
-        val messageTextView: TextView = view.findViewById(R.id.message_text)
-        val messageLayout: LinearLayout = view.findViewById(R.id.message_layout)
+    companion object {
+        private const val VIEW_TYPE_SENT = 1
+        private const val VIEW_TYPE_RECEIVED = 2
     }
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): MessageViewHolder {
-        val view = LayoutInflater.from(parent.context).inflate(R.layout.item_message, parent, false)
-        return MessageViewHolder(view)
+    override fun getItemViewType(position: Int): Int {
+        return if (messages[position].isMe) VIEW_TYPE_SENT else VIEW_TYPE_RECEIVED
     }
 
-    override fun onBindViewHolder(holder: MessageViewHolder, position: Int) {
-        val messageItem = messages[position]
-        holder.messageTextView.text = messageItem.message
-
-        if (messageItem.isMe) {
-            holder.messageLayout.setBackgroundResource(R.drawable.bg_message_sent)
-            holder.messageTextView.setTextColor(Color.WHITE)
-            holder.messageLayout.gravity = Gravity.START
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
+        val layoutInflater = LayoutInflater.from(parent.context)
+        return if (viewType == VIEW_TYPE_SENT) {
+            val view = layoutInflater.inflate(R.layout.item_message_sent, parent, false)
+            SentMessageViewHolder(view)
         } else {
-            holder.messageLayout.setBackgroundResource(R.drawable.bg_message_received)
-            holder.messageTextView.setTextColor(Color.BLACK)
-            holder.messageLayout.gravity = Gravity.END
+            val view = layoutInflater.inflate(R.layout.item_message_received, parent, false)
+            ReceivedMessageViewHolder(view)
+        }
+    }
+
+    override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
+        val messageItem = messages[position]
+        if (holder is SentMessageViewHolder) {
+            holder.messageTextView.text = messageItem.message
+        } else if (holder is ReceivedMessageViewHolder) {
+            holder.messageTextView.text = messageItem.message
         }
     }
 
     override fun getItemCount(): Int = messages.size
+
+    inner class SentMessageViewHolder(view: View) : RecyclerView.ViewHolder(view) {
+        val messageTextView: TextView = view.findViewById(R.id.message_text)
+    }
+
+    inner class ReceivedMessageViewHolder(view: View) : RecyclerView.ViewHolder(view) {
+        val messageTextView: TextView = view.findViewById(R.id.message_text)
+    }
 }
