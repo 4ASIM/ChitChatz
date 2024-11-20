@@ -90,8 +90,7 @@ class ChattingFragment : Fragment(R.layout.fragment_chatting) {
             try {
                 socket?.getOutputStream()?.let { outputStream ->
                     val writer = BufferedWriter(OutputStreamWriter(outputStream))
-                    writer.write(message)
-                    writer.newLine()
+                    writer.write(message + "::END::") // Append delimiter
                     writer.flush()
                     Log.d(TAG, "Message sent: $message")
                 }
@@ -101,18 +100,27 @@ class ChattingFragment : Fragment(R.layout.fragment_chatting) {
         }
     }
 
+
     private fun listenForMessages() {
         thread {
             try {
                 socket?.getInputStream()?.let { inputStream ->
                     val reader = BufferedReader(InputStreamReader(inputStream))
-                    while (socket?.isConnected == true) {
-                        val message = reader.readLine() ?: break
-                        if (message.isNotEmpty()) {
-                            Log.d(TAG, "Message received: $message")
+                    val stringBuilder = StringBuilder()
+                    var char: Int
+                    while (reader.read().also { char = it } != -1) {
+                        val currentChar = char.toChar()
+                        stringBuilder.append(currentChar)
+
+                        // Check for the delimiter
+                        if (stringBuilder.endsWith("::END::")) {
+                            // Remove the delimiter and get the full message
+                            val fullMessage = stringBuilder.removeSuffix("::END::").toString()
                             activity?.runOnUiThread {
-                                addMessage(message, false)
+                                addMessage(fullMessage, false)
                             }
+                            Log.d(TAG, "Message received: $fullMessage")
+                            stringBuilder.clear() // Clear the StringBuilder for the next message
                         }
                     }
                 }
@@ -121,6 +129,7 @@ class ChattingFragment : Fragment(R.layout.fragment_chatting) {
             }
         }
     }
+
 
     private fun addMessage(message: String, isMe: Boolean) {
         val messageItem = MessageItem(message, isMe)
