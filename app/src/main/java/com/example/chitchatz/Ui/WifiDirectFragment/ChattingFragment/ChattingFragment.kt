@@ -1,6 +1,7 @@
 package com.example.chitchatz.Ui.WifiDirectFragment.ChattingFragment
 
 import android.content.Intent
+import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.net.Uri
 import android.os.Bundle
@@ -73,26 +74,41 @@ class ChattingFragment : Fragment(R.layout.fragment_chatting) {
         super.onActivityResult(requestCode, resultCode, data)
         if (requestCode == REQUEST_IMAGE_PICK && resultCode == android.app.Activity.RESULT_OK) {
             val imageUri = data?.data
-            val imageBase64 = encodeImageToBase64(imageUri)
-            sendImage(imageBase64)
-            addMessage(null, true, imageBase64)  // Add the image message to the UI
+            if (imageUri != null) {
+                try {
+                    // Open InputStream to read the image bytes
+                    val inputStream = requireContext().contentResolver.openInputStream(imageUri)
+                    val imageBytes = inputStream?.readBytes()
+
+                    // Decode the image bytes into a Bitmap
+                    val bitmap = BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes?.size ?: 0)
+
+                    // Send the image bytes over the socket
+                    sendImage(imageUri)
+
+                    // Add the image message to the RecyclerView
+                    addMessage(null, true, bitmap)
+                } catch (e: IOException) {
+                    Log.e(TAG, "Error reading or sending image", e)
+                }
+            }
         }
     }
 
-    private fun encodeImageToBase64(imageUri: Uri?): String {
-        val inputStream = context?.contentResolver?.openInputStream(imageUri!!)
-        val byteArray = inputStream?.readBytes()
-        return Base64.encodeToString(byteArray, Base64.DEFAULT)
-    }
 
-    private fun sendImage(imageBase64: String) {
+    private fun sendImage(imageUri: Uri?) {
         thread {
             try {
+                val inputStream = context?.contentResolver?.openInputStream(imageUri!!)
+                val byteArray = inputStream?.readBytes() ?: return@thread
+
                 socket?.getOutputStream()?.let { outputStream ->
-                    val writer = BufferedWriter(OutputStreamWriter(outputStream))
-                    writer.write("IMAGE::$imageBase64::END::")  // Sending the image as a Base64 string
-                    writer.flush()
-                    Log.d(TAG, "Image sent")
+                    val dataOutputStream = DataOutputStream(outputStream)
+                    dataOutputStream.writeUTF("IMAGE") // Indicate the type of message
+                    dataOutputStream.writeInt(byteArray.size) // Write the size of the image
+                    dataOutputStream.write(byteArray) // Write the image data
+                    dataOutputStream.flush()
+                    Log.d(TAG, "Image sent as byte stream")
                 }
             } catch (e: IOException) {
                 Log.e(TAG, "Error sending image", e)
@@ -100,14 +116,21 @@ class ChattingFragment : Fragment(R.layout.fragment_chatting) {
         }
     }
 
+
+
     private fun sendMessage(message: String) {
         thread {
             try {
                 socket?.getOutputStream()?.let { outputStream ->
-                    val writer = BufferedWriter(OutputStreamWriter(outputStream))
-                    writer.write(message + "::END::")  // For text messages
-                    writer.flush()
+                    val dataOutputStream = DataOutputStream(outputStream)
+                    dataOutputStream.writeUTF("TEXT")
+                    dataOutputStream.writeUTF(message)
+                    dataOutputStream.flush()
                     Log.d(TAG, "Message sent: $message")
+
+                    activity?.runOnUiThread {
+                        addMessage(message, true, null)
+                    }
                 }
             } catch (e: IOException) {
                 Log.e(TAG, "Error sending message", e)
@@ -115,39 +138,38 @@ class ChattingFragment : Fragment(R.layout.fragment_chatting) {
         }
     }
 
+
     private fun listenForMessages() {
         thread {
             try {
                 socket?.getInputStream()?.let { inputStream ->
-                    val reader = BufferedReader(InputStreamReader(inputStream))
+                    val dataInputStream = DataInputStream(inputStream)
                     val stringBuilder = StringBuilder()
-                    var char: Int
-                    while (reader.read().also { char = it } != -1) {
-                        val currentChar = char.toChar()
-                        stringBuilder.append(currentChar)
+                    while (true) {
+                        // Read the type of incoming message (TEXT or IMAGE)
+                        val messageType = dataInputStream.readUTF() // Read the message type header
 
-                        // Check for the delimiter "::END::"
-                        if (stringBuilder.endsWith("::END::")) {
-                            val fullMessage = stringBuilder.removeSuffix("::END::").toString()
-
-                            // Check if the message is an image
-                            if (fullMessage.startsWith("IMAGE::")) {
-                                // It's an image message, extract the Base64 string
-                                val imageBase64 = fullMessage.removePrefix("IMAGE::")
-                                activity?.runOnUiThread {
-                                    // Add the image message to the RecyclerView
-                                    Log.d(TAG, "Received message: $fullMessage")
-                                    addMessage(null, false, imageBase64)
-                                }
-                            } else {
-                                // It's a text message
-                                activity?.runOnUiThread {
-                                    Log.d(TAG, "Received message: $fullMessage")
-
-                                    addMessage(fullMessage, false, null)
-                                }
+                        if (messageType == "TEXT") {
+                            // Read and append the incoming text message
+                            val message = dataInputStream.readUTF() // Read the actual message
+                            activity?.runOnUiThread {
+                                Log.d(TAG, "Received message: $message")
+                                addMessage(message, false, null) // Add text message to RecyclerView
                             }
-                            stringBuilder.clear() // Clear the stringBuilder for the next message
+                        } else if (messageType == "IMAGE") {
+                            // Read the size of the image
+                            val imageSize = dataInputStream.readInt()
+                            val byteArray = ByteArray(imageSize)
+                            dataInputStream.readFully(byteArray) // Read the image bytes
+
+                            // Decode the byte array into a Bitmap
+                            val bitmap = BitmapFactory.decodeByteArray(byteArray, 0, imageSize)
+                            activity?.runOnUiThread {
+                                Log.d(TAG, "Received an image")
+                                addMessage(null, false, bitmap) // Add image message to RecyclerView
+                            }
+                        } else {
+                            Log.e(TAG, "Unknown message type: $messageType")
                         }
                     }
                 }
@@ -158,9 +180,9 @@ class ChattingFragment : Fragment(R.layout.fragment_chatting) {
     }
 
 
-    private fun addMessage(message: String?, isMe: Boolean, imageBase64: String?) {
-        val messageItem = if (imageBase64 != null) {
-            MessageItem(isMe = isMe, imageUri = imageBase64)
+    private fun addMessage(message: String?, isMe: Boolean, imageBitmap: Bitmap?) {
+        val messageItem = if (imageBitmap != null) {
+            MessageItem(isMe = isMe, imageBitmap = imageBitmap)
         } else {
             MessageItem(message = message, isMe = isMe)
         }
@@ -169,6 +191,7 @@ class ChattingFragment : Fragment(R.layout.fragment_chatting) {
         adapter.notifyItemInserted(messages.size - 1)
         binding.messageList.scrollToPosition(messages.size - 1)
     }
+
 
 
     private fun setupServer() {

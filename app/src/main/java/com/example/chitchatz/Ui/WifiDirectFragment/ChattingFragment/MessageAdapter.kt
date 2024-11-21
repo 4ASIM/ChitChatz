@@ -38,26 +38,31 @@ class MessageAdapter(private val messages: List<MessageItem>) :
 
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
         val messageItem = messages[position]
-        if (messageItem.imageUri != null) {
-            // Decode the Base64 string into a bitmap
-            val decodedByte = Base64.decode(messageItem.imageUri, Base64.DEFAULT)
-            val bitmap = BitmapFactory.decodeByteArray(decodedByte, 0, decodedByte.size)
-
-            // Display the image in the appropriate ImageView
+        if (messageItem.imageBitmap != null) {
+            // Display the Bitmap in the ImageView
             if (holder is SentMessageViewHolder) {
-                holder.messageImageView.setImageBitmap(bitmap)
+                holder.messageImageView.setImageBitmap(messageItem.imageBitmap)
+                holder.messageTextView.visibility = View.GONE // Hide text view
+                holder.messageImageView.visibility = View.VISIBLE
             } else if (holder is ReceivedMessageViewHolder) {
-                holder.messageImageView.setImageBitmap(bitmap)
+                holder.messageImageView.setImageBitmap(messageItem.imageBitmap)
+                holder.messageTextView.visibility = View.GONE // Hide text view
+                holder.messageImageView.visibility = View.VISIBLE
             }
         } else {
-            // If it's a text message, set the text in the TextView
+            // Display the text message
             if (holder is SentMessageViewHolder) {
                 holder.messageTextView.text = messageItem.message
+                holder.messageImageView.visibility = View.GONE // Hide image view
+                holder.messageTextView.visibility = View.VISIBLE
             } else if (holder is ReceivedMessageViewHolder) {
                 holder.messageTextView.text = messageItem.message
+                holder.messageImageView.visibility = View.GONE // Hide image view
+                holder.messageTextView.visibility = View.VISIBLE
             }
         }
     }
+
 
 
     override fun getItemCount(): Int = messages.size
