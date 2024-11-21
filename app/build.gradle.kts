@@ -37,6 +37,7 @@ android {
     buildFeatures {
         viewBinding = true
     }
+
 }
 
 dependencies {
@@ -53,7 +54,7 @@ dependencies {
     androidTestImplementation("androidx.test.espresso:espresso-core:3.6.1")
 
     // lottie dependencie for splashscreen and other animation
-    implementation ("com.airbnb.android:lottie:5.0.3")
+    implementation("com.airbnb.android:lottie:5.0.3")
 
     // navigation (nav graph)
     implementation("androidx.navigation:navigation-fragment-ktx:2.8.4")
@@ -63,5 +64,8 @@ dependencies {
     implementation("androidx.room:room-runtime:2.5.0")
     kapt("androidx.room:room-compiler:2.5.0")
     implementation("androidx.room:room-ktx:2.5.0")
-    implementation ("androidx.work:work-runtime:2.8.0")
+    implementation("androidx.work:work-runtime:2.8.0")
+
+    //Glide Dependencies
+    implementation("com.github.bumptech.glide:glide:4.16.0")
 }

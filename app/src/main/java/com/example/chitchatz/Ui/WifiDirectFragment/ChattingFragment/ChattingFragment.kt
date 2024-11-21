@@ -104,9 +104,9 @@ class ChattingFragment : Fragment(R.layout.fragment_chatting) {
 
                 socket?.getOutputStream()?.let { outputStream ->
                     val dataOutputStream = DataOutputStream(outputStream)
-                    dataOutputStream.writeUTF("IMAGE") // Indicate the type of message
-                    dataOutputStream.writeInt(byteArray.size) // Write the size of the image
-                    dataOutputStream.write(byteArray) // Write the image data
+                    dataOutputStream.writeUTF("IMAGE")
+                    dataOutputStream.writeInt(byteArray.size)
+                    dataOutputStream.write(byteArray)
                     dataOutputStream.flush()
                     Log.d(TAG, "Image sent as byte stream")
                 }
@@ -151,10 +151,10 @@ class ChattingFragment : Fragment(R.layout.fragment_chatting) {
 
                         if (messageType == "TEXT") {
                             // Read and append the incoming text message
-                            val message = dataInputStream.readUTF() // Read the actual message
+                            val message = dataInputStream.readUTF()
                             activity?.runOnUiThread {
                                 Log.d(TAG, "Received message: $message")
-                                addMessage(message, false, null) // Add text message to RecyclerView
+                                addMessage(message, false, null)
                             }
                         } else if (messageType == "IMAGE") {
                             // Read the size of the image
@@ -166,7 +166,7 @@ class ChattingFragment : Fragment(R.layout.fragment_chatting) {
                             val bitmap = BitmapFactory.decodeByteArray(byteArray, 0, imageSize)
                             activity?.runOnUiThread {
                                 Log.d(TAG, "Received an image")
-                                addMessage(null, false, bitmap) // Add image message to RecyclerView
+                                addMessage(null, false, bitmap)
                             }
                         } else {
                             Log.e(TAG, "Unknown message type: $messageType")

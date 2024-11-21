@@ -11,6 +11,7 @@ import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
+import com.bumptech.glide.Glide
 import com.example.chitchatz.R
 
 class MessageAdapter(private val messages: List<MessageItem>) :
@@ -39,13 +40,20 @@ class MessageAdapter(private val messages: List<MessageItem>) :
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
         val messageItem = messages[position]
         if (messageItem.imageBitmap != null) {
-            // Display the Bitmap in the ImageView
+            // Load the Bitmap using Glide
             if (holder is SentMessageViewHolder) {
-                holder.messageImageView.setImageBitmap(messageItem.imageBitmap)
-                holder.messageTextView.visibility = View.GONE // Hide text view
+                Glide.with(holder.itemView.context)
+                    .load(messageItem.imageBitmap)
+                    .placeholder(R.drawable.loading_2_svgrepo_com)
+                    .into(holder.messageImageView)
+
+
+                holder.messageTextView.visibility = View.GONE
                 holder.messageImageView.visibility = View.VISIBLE
             } else if (holder is ReceivedMessageViewHolder) {
-                holder.messageImageView.setImageBitmap(messageItem.imageBitmap)
+                Glide.with(holder.itemView.context)
+                    .load(messageItem.imageBitmap)
+                    .into(holder.messageImageView)
                 holder.messageTextView.visibility = View.GONE // Hide text view
                 holder.messageImageView.visibility = View.VISIBLE
             }
@@ -62,6 +70,7 @@ class MessageAdapter(private val messages: List<MessageItem>) :
             }
         }
     }
+
 
 
 
