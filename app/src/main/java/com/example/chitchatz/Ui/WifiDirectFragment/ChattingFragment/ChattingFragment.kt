@@ -139,34 +139,58 @@ class ChattingFragment : Fragment(R.layout.fragment_chatting) {
     }
 
 
+    private fun saveImageToDeviceStorage(bitmap: Bitmap): String? {
+        val filename = "IMG_${System.currentTimeMillis()}.jpg"
+        val resolver = requireContext().contentResolver
+        val contentValues = android.content.ContentValues().apply {
+            put(android.provider.MediaStore.MediaColumns.DISPLAY_NAME, filename)
+            put(android.provider.MediaStore.MediaColumns.MIME_TYPE, "image/jpeg")
+            put(android.provider.MediaStore.MediaColumns.RELATIVE_PATH, "Pictures/ChatImages")
+        }
+
+        val imageUri = resolver.insert(android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI, contentValues)
+
+        return try {
+            imageUri?.let { uri ->
+                resolver.openOutputStream(uri)?.use { outputStream ->
+                    bitmap.compress(Bitmap.CompressFormat.JPEG, 100, outputStream)
+                }
+                uri.toString() // Return the URI string for future use
+            }
+        } catch (e: IOException) {
+            Log.e(TAG, "Error saving image to storage", e)
+            null
+        }
+    }
+
     private fun listenForMessages() {
         thread {
             try {
                 socket?.getInputStream()?.let { inputStream ->
                     val dataInputStream = DataInputStream(inputStream)
-                    val stringBuilder = StringBuilder()
                     while (true) {
-                        // Read the type of incoming message (TEXT or IMAGE)
-                        val messageType = dataInputStream.readUTF() // Read the message type header
+                        val messageType = dataInputStream.readUTF()
 
                         if (messageType == "TEXT") {
-                            // Read and append the incoming text message
                             val message = dataInputStream.readUTF()
                             activity?.runOnUiThread {
                                 Log.d(TAG, "Received message: $message")
                                 addMessage(message, false, null)
                             }
                         } else if (messageType == "IMAGE") {
-                            // Read the size of the image
                             val imageSize = dataInputStream.readInt()
                             val byteArray = ByteArray(imageSize)
-                            dataInputStream.readFully(byteArray) // Read the image bytes
+                            dataInputStream.readFully(byteArray)
 
-                            // Decode the byte array into a Bitmap
                             val bitmap = BitmapFactory.decodeByteArray(byteArray, 0, imageSize)
-                            activity?.runOnUiThread {
-                                Log.d(TAG, "Received an image")
-                                addMessage(null, false, bitmap)
+
+                            // Save the image to device storage and get the URI
+                            val imagePath = saveImageToDeviceStorage(bitmap)
+                            if (imagePath != null) {
+                                activity?.runOnUiThread {
+                                    Log.d(TAG, "Image saved to storage: $imagePath")
+                                    addMessage(null, false, null, imagePath) // Pass the URI
+                                }
                             }
                         } else {
                             Log.e(TAG, "Unknown message type: $messageType")
@@ -179,9 +203,10 @@ class ChattingFragment : Fragment(R.layout.fragment_chatting) {
         }
     }
 
-
-    private fun addMessage(message: String?, isMe: Boolean, imageBitmap: Bitmap?) {
-        val messageItem = if (imageBitmap != null) {
+    private fun addMessage(message: String?, isMe: Boolean, imageBitmap: Bitmap?, imageUri: String? = null) {
+        val messageItem = if (imageUri != null) {
+            MessageItem(isMe = isMe, imageUri = imageUri) // Reference the image URI for storage
+        } else if (imageBitmap != null) {
             MessageItem(isMe = isMe, imageBitmap = imageBitmap)
         } else {
             MessageItem(message = message, isMe = isMe)
@@ -191,6 +216,21 @@ class ChattingFragment : Fragment(R.layout.fragment_chatting) {
         adapter.notifyItemInserted(messages.size - 1)
         binding.messageList.scrollToPosition(messages.size - 1)
     }
+
+
+
+
+//    private fun addMessage(message: String?, isMe: Boolean, imageBitmap: Bitmap?) {
+//        val messageItem = if (imageBitmap != null) {
+//            MessageItem(isMe = isMe, imageBitmap = imageBitmap)
+//        } else {
+//            MessageItem(message = message, isMe = isMe)
+//        }
+//
+//        messages.add(messageItem)
+//        adapter.notifyItemInserted(messages.size - 1)
+//        binding.messageList.scrollToPosition(messages.size - 1)
+//    }
 
 
 

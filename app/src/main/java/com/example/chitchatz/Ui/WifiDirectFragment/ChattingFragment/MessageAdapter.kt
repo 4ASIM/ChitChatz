@@ -39,37 +39,52 @@ class MessageAdapter(private val messages: List<MessageItem>) :
 
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
         val messageItem = messages[position]
-        if (messageItem.imageBitmap != null) {
-            // Load the Bitmap using Glide
+
+        if (messageItem.imageUri != null) { // Display image from URI
+            if (holder is SentMessageViewHolder) {
+                Glide.with(holder.itemView.context)
+                    .load(messageItem.imageUri)
+                    .placeholder(R.drawable.loading_2_svgrepo_com)
+                    .into(holder.messageImageView)
+                holder.messageTextView.visibility = View.GONE
+                holder.messageImageView.visibility = View.VISIBLE
+            } else if (holder is ReceivedMessageViewHolder) {
+                Glide.with(holder.itemView.context)
+                    .load(messageItem.imageUri)
+                    .placeholder(R.drawable.loading_2_svgrepo_com)
+                    .into(holder.messageImageView)
+                holder.messageTextView.visibility = View.GONE
+                holder.messageImageView.visibility = View.VISIBLE
+            }
+        } else if (messageItem.imageBitmap != null) { // Fallback to bitmap if URI is not available
             if (holder is SentMessageViewHolder) {
                 Glide.with(holder.itemView.context)
                     .load(messageItem.imageBitmap)
                     .placeholder(R.drawable.loading_2_svgrepo_com)
                     .into(holder.messageImageView)
-
-
                 holder.messageTextView.visibility = View.GONE
                 holder.messageImageView.visibility = View.VISIBLE
             } else if (holder is ReceivedMessageViewHolder) {
                 Glide.with(holder.itemView.context)
                     .load(messageItem.imageBitmap)
+                    .placeholder(R.drawable.loading_2_svgrepo_com)
                     .into(holder.messageImageView)
-                holder.messageTextView.visibility = View.GONE // Hide text view
+                holder.messageTextView.visibility = View.GONE
                 holder.messageImageView.visibility = View.VISIBLE
             }
-        } else {
-            // Display the text message
+        } else if (messageItem.message != null) { // Display text message
             if (holder is SentMessageViewHolder) {
                 holder.messageTextView.text = messageItem.message
-                holder.messageImageView.visibility = View.GONE // Hide image view
+                holder.messageImageView.visibility = View.GONE
                 holder.messageTextView.visibility = View.VISIBLE
             } else if (holder is ReceivedMessageViewHolder) {
                 holder.messageTextView.text = messageItem.message
-                holder.messageImageView.visibility = View.GONE // Hide image view
+                holder.messageImageView.visibility = View.GONE
                 holder.messageTextView.visibility = View.VISIBLE
             }
         }
     }
+
 
 
 
