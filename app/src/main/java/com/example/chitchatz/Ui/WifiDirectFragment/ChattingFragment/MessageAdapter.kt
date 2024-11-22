@@ -40,54 +40,42 @@ class MessageAdapter(private val messages: List<MessageItem>) :
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
         val messageItem = messages[position]
 
-        if (messageItem.imageUri != null) { // Display image from URI
+        if (messageItem.imageUri != null) { // Display image
             if (holder is SentMessageViewHolder) {
                 Glide.with(holder.itemView.context)
                     .load(messageItem.imageUri)
                     .placeholder(R.drawable.loading_2_svgrepo_com)
                     .into(holder.messageImageView)
-                holder.messageTextView.visibility = View.GONE
-                holder.messageImageView.visibility = View.VISIBLE
+                holder.messageTextView.visibility = View.GONE // Hide text
+                holder.messageImageView.visibility = View.VISIBLE // Show image
             } else if (holder is ReceivedMessageViewHolder) {
                 Glide.with(holder.itemView.context)
                     .load(messageItem.imageUri)
                     .placeholder(R.drawable.loading_2_svgrepo_com)
                     .into(holder.messageImageView)
-                holder.messageTextView.visibility = View.GONE
-                holder.messageImageView.visibility = View.VISIBLE
+                holder.messageTextView.visibility = View.GONE // Hide text
+                holder.messageImageView.visibility = View.VISIBLE // Show image
             }
-        } else if (messageItem.imageBitmap != null) { // Fallback to bitmap if URI is not available
-            if (holder is SentMessageViewHolder) {
-                Glide.with(holder.itemView.context)
-                    .load(messageItem.imageBitmap)
-                    .placeholder(R.drawable.loading_2_svgrepo_com)
-                    .into(holder.messageImageView)
-                holder.messageTextView.visibility = View.GONE
-                holder.messageImageView.visibility = View.VISIBLE
-            } else if (holder is ReceivedMessageViewHolder) {
-                Glide.with(holder.itemView.context)
-                    .load(messageItem.imageBitmap)
-                    .placeholder(R.drawable.loading_2_svgrepo_com)
-                    .into(holder.messageImageView)
-                holder.messageTextView.visibility = View.GONE
-                holder.messageImageView.visibility = View.VISIBLE
-            }
-        } else if (messageItem.message != null) { // Display text message
+        } else if (messageItem.message != null) { // Display text
             if (holder is SentMessageViewHolder) {
                 holder.messageTextView.text = messageItem.message
-                holder.messageImageView.visibility = View.GONE
-                holder.messageTextView.visibility = View.VISIBLE
+                holder.messageImageView.visibility = View.GONE // Hide image
+                holder.messageTextView.visibility = View.VISIBLE // Show text
             } else if (holder is ReceivedMessageViewHolder) {
                 holder.messageTextView.text = messageItem.message
+                holder.messageImageView.visibility = View.GONE // Hide image
+                holder.messageTextView.visibility = View.VISIBLE // Show text
+            }
+        } else { // Handle invalid/empty messages
+            if (holder is SentMessageViewHolder) {
+                holder.messageTextView.visibility = View.GONE
                 holder.messageImageView.visibility = View.GONE
-                holder.messageTextView.visibility = View.VISIBLE
+            } else if (holder is ReceivedMessageViewHolder) {
+                holder.messageTextView.visibility = View.GONE
+                holder.messageImageView.visibility = View.GONE
             }
         }
     }
-
-
-
-
 
     override fun getItemCount(): Int = messages.size
 
