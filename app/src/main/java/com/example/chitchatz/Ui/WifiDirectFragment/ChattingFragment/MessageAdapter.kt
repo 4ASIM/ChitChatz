@@ -10,6 +10,7 @@ import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
+import androidx.cardview.widget.CardView
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.example.chitchatz.R
@@ -61,18 +62,22 @@ class MessageAdapter(private val messages: List<MessageItem>) :
                 holder.messageTextView.text = messageItem.message
                 holder.messageImageView.visibility = View.GONE // Hide image
                 holder.messageTextView.visibility = View.VISIBLE // Show text
+                holder.messageCardView.visibility = View.GONE
             } else if (holder is ReceivedMessageViewHolder) {
                 holder.messageTextView.text = messageItem.message
                 holder.messageImageView.visibility = View.GONE // Hide image
                 holder.messageTextView.visibility = View.VISIBLE // Show text
+                holder.messageCardView.visibility = View.GONE
             }
         } else { // Handle invalid/empty messages
             if (holder is SentMessageViewHolder) {
                 holder.messageTextView.visibility = View.GONE
                 holder.messageImageView.visibility = View.GONE
+                holder.messageCardView.visibility = View.GONE
             } else if (holder is ReceivedMessageViewHolder) {
                 holder.messageTextView.visibility = View.GONE
                 holder.messageImageView.visibility = View.GONE
+                holder.messageCardView.visibility = View.GONE
             }
         }
     }
@@ -82,10 +87,12 @@ class MessageAdapter(private val messages: List<MessageItem>) :
     inner class SentMessageViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         val messageTextView: TextView = view.findViewById(R.id.message_text)
         val messageImageView: ImageView = view.findViewById(R.id.message_image)
+        val messageCardView : CardView = view.findViewById(R.id.message_card)
     }
 
     inner class ReceivedMessageViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         val messageTextView: TextView = view.findViewById(R.id.message_text)
         val messageImageView: ImageView = view.findViewById(R.id.message_image)
+        val messageCardView : CardView = view.findViewById(R.id.message_card)
     }
 }
