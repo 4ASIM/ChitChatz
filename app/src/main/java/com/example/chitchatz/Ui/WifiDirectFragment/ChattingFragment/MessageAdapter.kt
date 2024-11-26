@@ -40,20 +40,25 @@ class MessageAdapter(private val messages: List<MessageItem>) :
 
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
         val messageItem = messages[position]
-
+        val formattedTime = android.text.format.DateFormat.format("hh:mm a", messageItem.timestamp).toString()
         if (messageItem.progress >= 0) { // If progress is being tracked
             if (holder is ReceivedMessageViewHolder) {
+                holder.timestampTextView.text = formattedTime
                 holder.progressTextView.visibility = View.VISIBLE
                 holder.progressTextView.text = "Loading... ${messageItem.progress}%"
                 holder.messageImageView.visibility = View.VISIBLE
                 holder.messageTextView.visibility = View.GONE
+                holder.timestampTextView.text = formattedTime
+
 
 
                 if (messageItem.progress == 100) {
+                    holder.timestampTextView.text = formattedTime
                     holder.progressTextView.visibility = View.GONE // Hide progress view
                     holder.messageImageView.visibility = View.VISIBLE // Show image
                     holder.messageCardView.visibility = View.GONE
                     holder.messageTextView.visibility = View.GONE
+                    holder.timestampTextView.text = formattedTime
                     Glide.with(holder.itemView.context)
                         .load(messageItem.imageUri)
                         .placeholder(R.drawable.loading_2_svgrepo_com)
@@ -73,6 +78,8 @@ class MessageAdapter(private val messages: List<MessageItem>) :
 
                 holder.messageImageView.visibility = View.VISIBLE
                 holder.messageTextView.visibility = View.GONE
+                holder.timestampTextView.text = formattedTime
+
 
             } else if (holder is ReceivedMessageViewHolder) {
                 Glide.with(holder.itemView.context)
@@ -85,6 +92,7 @@ class MessageAdapter(private val messages: List<MessageItem>) :
                 holder.messageTextView.visibility = View.GONE
                 holder.progressTextView.visibility = View.GONE
                 holder.messageCardView.visibility = View.VISIBLE
+                holder.timestampTextView.text = formattedTime
             }
         } else if (messageItem.message != null) { // Display text if available
             if (holder is SentMessageViewHolder) {
@@ -92,6 +100,8 @@ class MessageAdapter(private val messages: List<MessageItem>) :
                 holder.messageImageView.visibility = View.VISIBLE
                 holder.messageTextView.visibility = View.VISIBLE
                 holder.messageCardView.visibility = View.GONE
+                holder.timestampTextView.text = formattedTime
+
 
             } else if (holder is ReceivedMessageViewHolder) {
                 holder.messageTextView.text = messageItem.message
@@ -99,6 +109,7 @@ class MessageAdapter(private val messages: List<MessageItem>) :
                 holder.messageTextView.visibility = View.VISIBLE
                 holder.progressTextView.visibility = View.GONE
                 holder.messageCardView.visibility = View.GONE
+                holder.timestampTextView.text = formattedTime
 
             }
         } else { // Handle invalid/empty messages
@@ -120,6 +131,7 @@ class MessageAdapter(private val messages: List<MessageItem>) :
         val messageTextView: TextView = view.findViewById(R.id.message_text)
         val messageImageView: ImageView = view.findViewById(R.id.message_image)
         val messageCardView : CardView = view.findViewById(R.id.message_card)
+        val timestampTextView: TextView = view.findViewById(R.id.message_timestamp)
     }
 
     inner class ReceivedMessageViewHolder(view: View) : RecyclerView.ViewHolder(view) {
@@ -127,5 +139,6 @@ class MessageAdapter(private val messages: List<MessageItem>) :
         val messageImageView: ImageView = view.findViewById(R.id.message_image)
         val messageCardView : CardView = view.findViewById(R.id.message_card)
         val progressTextView :  TextView = view.findViewById(R.id.progress_text)
+        val timestampTextView: TextView = view.findViewById(R.id.message_timestamp)
     }
 }

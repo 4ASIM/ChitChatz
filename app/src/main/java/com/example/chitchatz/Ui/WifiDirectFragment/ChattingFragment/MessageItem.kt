@@ -7,5 +7,6 @@ data class MessageItem(
     val isMe: Boolean = false,
     var imageUri: String? = null,// For identifying if the message is sent by the current user
     val imageBitmap: Bitmap? = null, // For image messages (Base64 encoded string)
-    var progress: Int = -1
+    var progress: Int = -1,
+    val timestamp: Long = System.currentTimeMillis()
 )

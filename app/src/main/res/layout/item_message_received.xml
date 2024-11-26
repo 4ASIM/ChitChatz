@@ -4,6 +4,7 @@
     android:layout_height="wrap_content"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:padding="8dp"
+    android:orientation="vertical"
     android:gravity="start"> <!-- Align to the left -->
     <TextView
         android:id="@+id/progress_text"
@@ -52,4 +53,13 @@
         android:textColor="@android:color/black"
         android:background="@drawable/bg_message_received"
         android:textSize="16sp"/>
+    <TextView
+        android:id="@+id/message_timestamp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="3dp"
+        android:layout_marginBottom="5dp"
+        android:layout_gravity="center"
+        android:textColor="@android:color/darker_gray"
+        android:textSize="12sp" />
 </LinearLayout>
