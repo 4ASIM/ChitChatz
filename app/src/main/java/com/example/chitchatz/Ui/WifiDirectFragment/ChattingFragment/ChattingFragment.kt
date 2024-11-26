@@ -187,9 +187,9 @@ class ChattingFragment : Fragment(R.layout.fragment_chatting) {
         return try {
             imageUri?.let { uri ->
                 resolver.openOutputStream(uri)?.use { outputStream ->
-                    bitmap.compress(Bitmap.CompressFormat.JPEG, 100, outputStream)  // Save as JPEG
+                    bitmap.compress(Bitmap.CompressFormat.JPEG, 100, outputStream)
                 }
-                uri.toString() // Return the URI as string for later use
+                uri.toString()
             }
         } catch (e: IOException) {
             Log.e(TAG, "Error saving image to storage", e)
@@ -213,35 +213,47 @@ class ChattingFragment : Fragment(R.layout.fragment_chatting) {
                                 addMessage(message, false, null)
                             }
                         } else if (messageType == "IMAGE") {
-                            val imageSize = dataInputStream.readInt()  // Total image size
-                            val sentChecksum = dataInputStream.readLong()  // Sent CRC32 checksum
+                            val imageSize = dataInputStream.readInt()
+                            val sentChecksum = dataInputStream.readLong()
                             val byteArray = ByteArray(imageSize)
                             var offset = 0
 
-                            // Read the image in chunks
-                            while (offset < imageSize) {
-                                val chunkSize = dataInputStream.readInt()  // Current chunk size
-                                dataInputStream.readFully(byteArray, offset, chunkSize)
-                                offset += chunkSize
+                            // Create a new message item for progress updates
+                            val messageItem = MessageItem(null, false, null, progress = 0)
+                            activity?.runOnUiThread {
+                                messages.add(messageItem)
+                                adapter.notifyItemInserted(messages.size - 1)
                             }
 
-                            // Calculate the CRC32 checksum for the received data
+                            // Update progress
+                            while (offset < imageSize) {
+                                val chunkSize = dataInputStream.readInt()
+                                dataInputStream.readFully(byteArray, offset, chunkSize)
+                                offset += chunkSize
+
+                                val progress = (offset * 100) / imageSize
+                                activity?.runOnUiThread {
+                                    messageItem.progress = progress
+                                    adapter.notifyItemChanged(messages.indexOf(messageItem))
+                                }
+                            }
+
+                            // After receiving, verify the checksum
                             val crc32 = CRC32()
                             crc32.update(byteArray)
                             val receivedChecksum = crc32.value
 
-                            // Verify checksum
                             if (sentChecksum == receivedChecksum) {
-                                // If checksum matches, decode the image
+                                // Decode the image
                                 val bitmap = BitmapFactory.decodeByteArray(byteArray, 0, imageSize)
-
-                                // Save the image to the device storage
                                 val imagePath = saveImageToDeviceStorage(bitmap)
-                                if (imagePath != null) {
-                                    // Pass the saved image URI to the RecyclerView
-                                    activity?.runOnUiThread {
+
+                                activity?.runOnUiThread {
+                                    if (imagePath != null) {
                                         Log.d(TAG, "Image saved to storage: $imagePath")
-                                        addMessage(null, false, null, imagePath) // Pass the image URI
+                                        messageItem.progress = -1  // Reset progress
+                                        messageItem.imageUri = imagePath
+                                        adapter.notifyItemChanged(messages.indexOf(messageItem))
                                     }
                                 }
                             } else {
@@ -265,18 +277,18 @@ class ChattingFragment : Fragment(R.layout.fragment_chatting) {
         imageBitmap: Bitmap? = null,
         imageUri: String? = null
     ) {
-        // Ensure only valid data is added to the list
+
         if (message == null && imageBitmap == null && imageUri == null) {
             Log.e(TAG, "Invalid message: No text or image to display")
             return
         }
 
         val messageItem = if (imageUri != null) {
-            MessageItem(isMe = isMe, imageUri = imageUri) // Use URI if available
+            MessageItem(isMe = isMe, imageUri = imageUri)
         } else if (imageBitmap != null) {
-            MessageItem(isMe = isMe, imageBitmap = imageBitmap) // Use Bitmap
+            MessageItem(isMe = isMe, imageBitmap = imageBitmap)
         } else {
-            MessageItem(message = message, isMe = isMe) // Use text
+            MessageItem(message = message, isMe = isMe)
         }
 
         messages.add(messageItem)
