@@ -41,6 +41,14 @@
                 android:layout_marginEnd="8dp"
                 android:background="@drawable/photo_camera_filled_svgrepo_com"
                 android:padding="8dp" />
+            <ImageButton
+                android:id="@+id/videoPickerButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
+                android:layout_marginEnd="8dp"
+                android:background="@drawable/photo_camera_filled_svgrepo_com"
+                android:padding="8dp" />
 
             <EditText
                 android:id="@+id/text_send"

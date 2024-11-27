@@ -1,10 +1,15 @@
 package com.example.chitchatz.Ui.WifiDirectFragment.ChattingFragment
 
+import android.app.Activity
+import android.content.ContentUris
+import android.content.ContentValues
+import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.net.Uri
 import android.os.Bundle
+import android.provider.MediaStore
 import android.util.Base64
 import android.util.Log
 import android.view.View
@@ -33,6 +38,7 @@ class ChattingFragment : Fragment(R.layout.fragment_chatting) {
         const val PORT = 8888
         const val TAG = "ChattingFragment"
         const val REQUEST_IMAGE_PICK = 1001
+        const val REQUEST_VIDEO_PICK = 1002
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -64,6 +70,12 @@ class ChattingFragment : Fragment(R.layout.fragment_chatting) {
             }
         }
 
+        binding.videoPickerButton.setOnClickListener {
+            val intent = Intent(Intent.ACTION_PICK, android.provider.MediaStore.Video.Media.EXTERNAL_CONTENT_URI)
+            startActivityForResult(intent, REQUEST_VIDEO_PICK)
+        }
+
+
         binding.photoPickerButton.setOnClickListener {
             // Open image picker
             val intent = Intent(Intent.ACTION_PICK, android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI)
@@ -73,27 +85,98 @@ class ChattingFragment : Fragment(R.layout.fragment_chatting) {
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
-        if (requestCode == REQUEST_IMAGE_PICK && resultCode == android.app.Activity.RESULT_OK) {
-            val imageUri = data?.data
-            if (imageUri != null) {
-                try {
-                    // Open InputStream to read the image bytes
-                    val inputStream = requireContext().contentResolver.openInputStream(imageUri)
-                    val imageBytes = inputStream?.readBytes()
 
-                    val bitmap = BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes?.size ?: 0)
+        if (resultCode == Activity.RESULT_OK) {
+            when (requestCode) {
+                REQUEST_IMAGE_PICK -> {
+                    val imageUri = data?.data
+                    imageUri?.let {
+                        try {
+                            val inputStream = requireContext().contentResolver.openInputStream(it)
+                            val imageBytes = inputStream?.readBytes()
+                            val bitmap = BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes?.size ?: 0)
 
-                    // Send the image bytes over the socket
-                    sendImage(imageUri)
-
-                    // Add the image message to the RecyclerView
-                    addMessage(null, true, bitmap)
-                } catch (e: IOException) {
-                    Log.e(TAG, "Error reading or sending image", e)
+                            sendImage(it) // Send image
+                            addMessage(null, true, bitmap) // Display in RecyclerView
+                        } catch (e: IOException) {
+                            Log.e(TAG, "Error reading or sending image", e)
+                        }
+                    }
+                }
+                REQUEST_VIDEO_PICK -> {
+                    val videoUri = data?.data
+                    videoUri?.let {
+                        try {
+                            sendVideo(it) // Send video
+                            addMessage(null, true, null, videoUri.toString()) // Display in RecyclerView
+                        } catch (e: IOException) {
+                            Log.e(TAG, "Error reading or sending video", e)
+                        }
+                    }
                 }
             }
         }
     }
+    private fun getVideoThumbnail(videoUri: Uri): Bitmap? {
+        return try {
+            MediaStore.Video.Thumbnails.getThumbnail(
+                requireContext().contentResolver,
+                ContentUris.parseId(videoUri),
+                MediaStore.Video.Thumbnails.MINI_KIND,
+                null
+            )
+        } catch (e: Exception) {
+            e.printStackTrace()
+            null
+        }
+    }
+
+    private fun sendVideo(videoUri: Uri) {
+        thread {
+            try {
+                val inputStream = context?.contentResolver?.openInputStream(videoUri)
+                val byteArray = inputStream?.readBytes() ?: return@thread
+
+                // Calculate CRC32 checksum of the video data
+                val crc32 = CRC32()
+                crc32.update(byteArray)
+
+                val checksum = crc32.value
+                val chunkSize = 1024 * 8 // 8 KB chunks
+                var offset = 0
+
+                socket?.getOutputStream()?.let { outputStream ->
+                    val dataOutputStream = DataOutputStream(outputStream)
+                    dataOutputStream.writeUTF("VIDEO") // Message type
+                    dataOutputStream.writeInt(byteArray.size) // Total video size
+                    dataOutputStream.writeLong(checksum) // CRC32 checksum
+                    dataOutputStream.flush()
+
+                    // Send the video in chunks
+                    while (offset < byteArray.size) {
+                        val remainingSize = byteArray.size - offset
+                        val sizeToSend = if (remainingSize < chunkSize) remainingSize else chunkSize
+
+                        dataOutputStream.writeInt(sizeToSend) // Chunk size
+                        dataOutputStream.write(byteArray, offset, sizeToSend) // Chunk data
+                        dataOutputStream.flush()
+
+                        offset += sizeToSend
+                    }
+
+                    Log.d(TAG, "Video sent in chunks with CRC32 checksum")
+                }
+
+                activity?.runOnUiThread {
+                    addMessage(null, true, null, videoUri.toString())
+                }
+            } catch (e: IOException) {
+                Log.e(TAG, "Error sending video", e)
+            }
+        }
+    }
+
+
 
 
     private fun sendImage(imageUri: Uri?) {
@@ -171,6 +254,39 @@ class ChattingFragment : Fragment(R.layout.fragment_chatting) {
             }
         }
     }
+    private fun saveVideoToDeviceStorage(byteArray: ByteArray): String? {
+        val filename = "VID_${System.currentTimeMillis()}.mp4"
+        val resolver = requireContext().contentResolver
+        val contentValues = android.content.ContentValues().apply {
+            put(android.provider.MediaStore.MediaColumns.DISPLAY_NAME, filename)
+            put(android.provider.MediaStore.MediaColumns.MIME_TYPE, "video/mp4")
+            put(android.provider.MediaStore.MediaColumns.RELATIVE_PATH, "Movies/ChatVideos")
+        }
+
+        val videoUri = resolver.insert(android.provider.MediaStore.Video.Media.EXTERNAL_CONTENT_URI, contentValues)
+        return try {
+            videoUri?.let { uri ->
+                resolver.openOutputStream(uri)?.use { outputStream ->
+                    outputStream.write(byteArray)
+                }
+
+                // After saving the video, trigger media scanner to update the gallery
+                val intent = Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE)
+                val file = File(uri.path ?: "") // Get the path from the URI
+                val videoUri = Uri.fromFile(file)
+                intent.data = videoUri
+                requireContext().sendBroadcast(intent)
+
+                uri.toString() // Return the URI of the saved video
+            }
+        } catch (e: IOException) {
+            Log.e(TAG, "Error saving video to storage", e)
+            null
+        }
+    }
+
+
+
 
 
     private fun saveImageToDeviceStorage(bitmap: Bitmap): String? {
@@ -212,7 +328,8 @@ class ChattingFragment : Fragment(R.layout.fragment_chatting) {
                                 Log.d(TAG, "Received message: $message")
                                 addMessage(message, false, null)
                             }
-                        } else if (messageType == "IMAGE") {
+                        }
+                        else if (messageType == "IMAGE") {
                             val imageSize = dataInputStream.readInt()
                             val sentChecksum = dataInputStream.readLong()
                             val byteArray = ByteArray(imageSize)
@@ -224,6 +341,7 @@ class ChattingFragment : Fragment(R.layout.fragment_chatting) {
                                 messages.add(messageItem)
                                 adapter.notifyItemInserted(messages.size - 1)
                             }
+
 
                             // Update progress
                             while (offset < imageSize) {
@@ -259,7 +377,53 @@ class ChattingFragment : Fragment(R.layout.fragment_chatting) {
                             } else {
                                 Log.e(TAG, "Checksum mismatch! Image data is corrupted.")
                             }
-                        } else {
+                        }
+                        else if (messageType == "VIDEO") {
+                            val videoSize = dataInputStream.readInt()
+                            val sentChecksum = dataInputStream.readLong()
+                            val byteArray = ByteArray(videoSize)
+                            var offset = 0
+
+                            val messageItem = MessageItem(null, false, null, progress = 0)
+                            activity?.runOnUiThread {
+                                messages.add(messageItem)
+                                adapter.notifyItemInserted(messages.size - 1)
+                            }
+
+
+                            while (offset < videoSize) {
+                                val chunkSize = dataInputStream.readInt()
+                                dataInputStream.readFully(byteArray, offset, chunkSize)
+                                offset += chunkSize
+
+                                val progress = (offset * 100) / videoSize
+                                activity?.runOnUiThread {
+                                    messageItem.progress = progress
+                                    adapter.notifyItemChanged(messages.indexOf(messageItem))
+                                }
+                            }
+
+                            val crc32 = CRC32()
+                            crc32.update(byteArray)
+                            val receivedChecksum = crc32.value
+
+                            if (sentChecksum == receivedChecksum) {
+                                val videoPath = saveVideoToDeviceStorage(byteArray)
+                                val videoThumbnail = getVideoThumbnail(Uri.parse(videoPath!!)) // Convert String to Uri
+                                // Generate thumbnail
+
+                                activity?.runOnUiThread {
+                                    messageItem.progress = -1
+                                    messageItem.videoUri = videoPath
+                                    messageItem.videoThumbnail = videoThumbnail
+                                    adapter.notifyItemChanged(messages.indexOf(messageItem))
+                                }
+                            } else {
+                                Log.e(TAG, "Checksum mismatch! Video data is corrupted.")
+                            }
+                        }
+
+                        else {
                             Log.e(TAG, "Unknown message type: $messageType")
                         }
                     }
@@ -270,31 +434,45 @@ class ChattingFragment : Fragment(R.layout.fragment_chatting) {
         }
     }
 
-
     private fun addMessage(
         message: String?,
         isMe: Boolean,
         imageBitmap: Bitmap? = null,
-        imageUri: String? = null
+        imageUri: String? = null,
+        videoUri: String? = null
     ) {
-
-        if (message == null && imageBitmap == null && imageUri == null) {
-            Log.e(TAG, "Invalid message: No text or image to display")
+        if (message == null && imageBitmap == null && imageUri == null && videoUri == null) {
+            Log.e(TAG, "Invalid message: No text, image, or video to display")
             return
         }
 
-        val messageItem = if (imageUri != null) {
-            MessageItem(isMe = isMe, imageUri = imageUri)
-        } else if (imageBitmap != null) {
-            MessageItem(isMe = isMe, imageBitmap = imageBitmap)
-        } else {
-            MessageItem(message = message, isMe = isMe)
+        // Define a variable to hold the thumbnail
+        var videoThumbnail: Bitmap? = null
+
+        // If a videoUri is provided, generate the thumbnail
+        if (videoUri != null) {
+            // Generate the video thumbnail using the updated getVideoThumbnail method
+            videoThumbnail = getVideoThumbnail(Uri.parse(videoUri))
+
         }
 
+        // Create the appropriate message item
+        val messageItem = when {
+            videoUri != null -> MessageItem(isMe = isMe, videoUri = videoUri, videoThumbnail = videoThumbnail)
+            imageUri != null -> MessageItem(isMe = isMe, imageUri = imageUri)
+            imageBitmap != null -> MessageItem(isMe = isMe, imageBitmap = imageBitmap)
+            else -> MessageItem(message = message, isMe = isMe)
+        }
+
+        // Add the message to the list and notify the adapter
         messages.add(messageItem)
         adapter.notifyItemInserted(messages.size - 1)
+
+        // Scroll to the new message position
         binding.messageList.scrollToPosition(messages.size - 1)
     }
+
+
 
 
 
