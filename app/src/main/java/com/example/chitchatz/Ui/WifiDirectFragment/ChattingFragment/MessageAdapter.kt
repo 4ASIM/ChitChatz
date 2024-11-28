@@ -56,7 +56,20 @@ class MessageAdapter(private val messages: List<MessageItem>) :
                 holder.messageImageView.visibility = View.VISIBLE
                 holder.messageTextView.visibility = View.GONE
                 holder.timestampTextView.text = formattedTime
-
+                holder.messageImageView.setOnClickListener {
+                    val context = holder.itemView.context
+                    val imageUri = Uri.parse(messageItem.imageUri) // Assuming it's a valid URI
+                    val intent = Intent(Intent.ACTION_VIEW).apply {
+                        setDataAndType(imageUri, "image/*")
+                        flags = Intent.FLAG_GRANT_READ_URI_PERMISSION // Ensure permission to read
+                    }
+                    try {
+                        context.startActivity(intent) // Open the image in an external app
+                    } catch (e: Exception) {
+                        // Handle exception (e.g., no app to handle the intent)
+                        Log.e("ImageOpenError", "No app available to view the image: $e")
+                    }
+                }
 
 
                 if (messageItem.progress == 100) {
@@ -73,6 +86,8 @@ class MessageAdapter(private val messages: List<MessageItem>) :
                         .into(holder.messageImageView)
 
                     messageItem.progress = -1 // Reset progress to avoid repeated updates
+
+
                 }
             }
         } else if (messageItem.imageUri != null) { // Display image if no progress is tracked
@@ -86,7 +101,20 @@ class MessageAdapter(private val messages: List<MessageItem>) :
                 holder.messageImageView.visibility = View.VISIBLE
                 holder.messageTextView.visibility = View.GONE
                 holder.timestampTextView.text = formattedTime
-
+                holder.messageImageView.setOnClickListener {
+                    val context = holder.itemView.context
+                    val imageUri = Uri.parse(messageItem.imageUri) // Assuming it's a valid URI
+                    val intent = Intent(Intent.ACTION_VIEW).apply {
+                        setDataAndType(imageUri, "image/*")
+                        flags = Intent.FLAG_GRANT_READ_URI_PERMISSION // Ensure permission to read
+                    }
+                    try {
+                        context.startActivity(intent) // Open the image in an external app
+                    } catch (e: Exception) {
+                        // Handle exception (e.g., no app to handle the intent)
+                        Log.e("ImageOpenError", "No app available to view the image: $e")
+                    }
+                }
 
             } else if (holder is ReceivedMessageViewHolder) {
                 Glide.with(holder.itemView.context)
@@ -100,6 +128,20 @@ class MessageAdapter(private val messages: List<MessageItem>) :
                 holder.progressTextView.visibility = View.GONE
                 holder.messageCardView.visibility = View.VISIBLE
                 holder.timestampTextView.text = formattedTime
+                holder.messageImageView.setOnClickListener {
+                    val context = holder.itemView.context
+                    val imageUri = Uri.parse(messageItem.imageUri) // Assuming it's a valid URI
+                    val intent = Intent(Intent.ACTION_VIEW).apply {
+                        setDataAndType(imageUri, "image/*")
+                        flags = Intent.FLAG_GRANT_READ_URI_PERMISSION // Ensure permission to read
+                    }
+                    try {
+                        context.startActivity(intent) // Open the image in an external app
+                    } catch (e: Exception) {
+                        // Handle exception (e.g., no app to handle the intent)
+                        Log.e("ImageOpenError", "No app available to view the image: $e")
+                    }
+                }
             }
         }
         else if (messageItem.message != null) { // Display text if available
@@ -110,7 +152,20 @@ class MessageAdapter(private val messages: List<MessageItem>) :
                 holder.messageTextView.visibility = View.VISIBLE
                 holder.messageCardView.visibility = View.GONE
                 holder.timestampTextView.text = formattedTime
-
+                holder.messageImageView.setOnClickListener {
+                    val context = holder.itemView.context
+                    val imageUri = Uri.parse(messageItem.imageUri) // Assuming it's a valid URI
+                    val intent = Intent(Intent.ACTION_VIEW).apply {
+                        setDataAndType(imageUri, "image/*")
+                        flags = Intent.FLAG_GRANT_READ_URI_PERMISSION // Ensure permission to read
+                    }
+                    try {
+                        context.startActivity(intent) // Open the image in an external app
+                    } catch (e: Exception) {
+                        // Handle exception (e.g., no app to handle the intent)
+                        Log.e("ImageOpenError", "No app available to view the image: $e")
+                    }
+                }
 
             } else if (holder is ReceivedMessageViewHolder) {
                 holder.messageTextView.text = messageItem.message
@@ -119,7 +174,20 @@ class MessageAdapter(private val messages: List<MessageItem>) :
                 holder.progressTextView.visibility = View.GONE
                 holder.messageCardView.visibility = View.GONE
                 holder.timestampTextView.text = formattedTime
-
+                holder.messageImageView.setOnClickListener {
+                    val context = holder.itemView.context
+                    val imageUri = Uri.parse(messageItem.imageUri) // Assuming it's a valid URI
+                    val intent = Intent(Intent.ACTION_VIEW).apply {
+                        setDataAndType(imageUri, "image/*")
+                        flags = Intent.FLAG_GRANT_READ_URI_PERMISSION // Ensure permission to read
+                    }
+                    try {
+                        context.startActivity(intent) // Open the image in an external app
+                    } catch (e: Exception) {
+                        // Handle exception (e.g., no app to handle the intent)
+                        Log.e("ImageOpenError", "No app available to view the image: $e")
+                    }
+                }
             }
         }
         else if (messageItem.videoUri != null) { // Display video if URI exists
@@ -134,37 +202,32 @@ class MessageAdapter(private val messages: List<MessageItem>) :
                 Log.e("ThumbnailError", "Failed to generate thumbnail for video: ${videoUri.path}")
             }
 
-//            if (holder is SentMessageViewHolder) {
-//                Glide.with(holder.itemView.context)
-//                    .load(messageItem.videoThumbnail ?: thumbnail)
-//                    .placeholder(R.drawable.loading_2_svgrepo_com)
-//                    .into(holder.messageVideoView)
-//
-//                holder.messageImageView.visibility = View.GONE
-//                holder.messageTextView.visibility = View.GONE
-//                holder.messageVideoView.visibility = View.GONE
-//                holder.messageCardView.visibility = View.GONE
-//                holder.timestampTextView.text = formattedTime
-//
-//                if (messageItem.videoUri != null) {
-//                    holder.messageImageView.visibility = View.GONE
-//                    holder.messageTextView.visibility = View.GONE
-//                    holder.messageCardView.visibility = View.GONE
-//                    holder.messageVideoView.visibility = View.GONE
-//                    holder.messageVideoView.setImageBitmap(messageItem.videoThumbnail)
-//
-//                    holder.messageVideoView.setOnClickListener {
-//                        val context = holder.itemView.context
-//                        val videoUri = Uri.parse(messageItem.videoUri)
-//                        val intent = Intent(Intent.ACTION_VIEW).apply {
-//                            setDataAndType(videoUri, "video/*")
-//                        }
-//                        context.startActivity(intent)
-//                    }
-//                }
-//
-//            } else
-                if (holder is ReceivedMessageViewHolder) {
+            if (holder is SentMessageViewHolder) {
+                Glide.with(holder.itemView.context)
+                    .load(messageItem.videoThumbnail ?: thumbnail)
+                    .placeholder(R.drawable.loading_2_svgrepo_com)
+                    .into(holder.messageVideoView)
+
+
+                if (messageItem.videoUri != null) {
+                    holder.messageImageView.visibility = View.GONE
+                    holder.messageTextView.visibility = View.GONE
+                    holder.messageCardView.visibility = View.GONE
+                    holder.messageVideoView.visibility = View.GONE
+                    holder.messageVideoView.setImageBitmap(messageItem.videoThumbnail)
+
+                    holder.messageVideoView.setOnClickListener {
+                        val context = holder.itemView.context
+                        val videoUri = Uri.parse(messageItem.videoUri)
+                        val intent = Intent(Intent.ACTION_VIEW).apply {
+                            setDataAndType(videoUri, "video/*")
+                        }
+                        context.startActivity(intent)
+                    }
+                }
+
+            }
+            else if (holder is ReceivedMessageViewHolder) {
                 Glide.with(holder.itemView.context)
                     .load(messageItem.videoThumbnail ?: thumbnail)
                     .placeholder(R.drawable.loading_2_svgrepo_com)
