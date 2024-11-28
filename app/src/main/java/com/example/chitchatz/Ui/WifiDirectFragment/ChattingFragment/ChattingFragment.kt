@@ -71,16 +71,21 @@ class ChattingFragment : Fragment(R.layout.fragment_chatting) {
         }
 
         binding.videoPickerButton.setOnClickListener {
-            val intent = Intent(Intent.ACTION_PICK, android.provider.MediaStore.Video.Media.EXTERNAL_CONTENT_URI)
+            // Open video picker with filter for videos only
+            val intent = Intent(Intent.ACTION_PICK)
+            intent.type = "video/*"  // This will restrict the selection to videos
             startActivityForResult(intent, REQUEST_VIDEO_PICK)
         }
 
 
+
         binding.photoPickerButton.setOnClickListener {
-            // Open image picker
-            val intent = Intent(Intent.ACTION_PICK, android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI)
+            // Open image picker with filter for images only
+            val intent = Intent(Intent.ACTION_PICK)
+            intent.type = "image/*"  // This will restrict the selection to images
             startActivityForResult(intent, REQUEST_IMAGE_PICK)
         }
+
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -166,7 +171,6 @@ class ChattingFragment : Fragment(R.layout.fragment_chatting) {
 
                     Log.d(TAG, "Video sent in chunks with CRC32 checksum")
                 }
-
                 activity?.runOnUiThread {
                     addMessage(null, true, null, videoUri.toString())
                 }
@@ -342,7 +346,6 @@ class ChattingFragment : Fragment(R.layout.fragment_chatting) {
                                 adapter.notifyItemInserted(messages.size - 1)
                             }
 
-
                             // Update progress
                             while (offset < imageSize) {
                                 val chunkSize = dataInputStream.readInt()
@@ -390,7 +393,6 @@ class ChattingFragment : Fragment(R.layout.fragment_chatting) {
                                 adapter.notifyItemInserted(messages.size - 1)
                             }
 
-
                             while (offset < videoSize) {
                                 val chunkSize = dataInputStream.readInt()
                                 dataInputStream.readFully(byteArray, offset, chunkSize)
@@ -434,6 +436,7 @@ class ChattingFragment : Fragment(R.layout.fragment_chatting) {
         }
     }
 
+
     private fun addMessage(
         message: String?,
         isMe: Boolean,
@@ -471,14 +474,6 @@ class ChattingFragment : Fragment(R.layout.fragment_chatting) {
         // Scroll to the new message position
         binding.messageList.scrollToPosition(messages.size - 1)
     }
-
-
-
-
-
-
-
-
 //    private fun addMessage(message: String?, isMe: Boolean, imageBitmap: Bitmap?) {
 //        val messageItem = if (imageBitmap != null) {
 //            MessageItem(isMe = isMe, imageBitmap = imageBitmap)
