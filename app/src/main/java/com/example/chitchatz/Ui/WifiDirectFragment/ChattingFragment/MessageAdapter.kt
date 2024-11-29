@@ -1,28 +1,36 @@
 package com.example.chitchatz.Ui.WifiDirectFragment.ChattingFragment
 
+import android.content.Context
 import android.content.Intent
-import android.graphics.BitmapFactory
-import android.graphics.Color
-import android.media.ThumbnailUtils
+import android.graphics.Bitmap
 import android.net.Uri
-import android.provider.MediaStore
-import android.util.Base64
-import android.util.Log
-import android.view.Gravity
+import android.os.Bundle
+import android.provider.Settings.Global.putString
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Button
+import android.widget.FrameLayout
 import android.widget.ImageView
 import android.widget.LinearLayout
+import android.widget.ProgressBar
 import android.widget.TextView
-import android.widget.VideoView
-import androidx.cardview.widget.CardView
+import androidx.fragment.app.FragmentManager
+import androidx.navigation.findNavController
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.example.chitchatz.R
+import com.example.pingme.ui.contactpreview.ContactDetailsDialogFragment
+import com.example.pingme.ui.imagepreview.ImagePreviewFragment
+import com.example.pingme.ui.videopreview.VideoPreviewFragment
+import java.io.ByteArrayOutputStream
+import java.text.SimpleDateFormat
+import java.util.*
 
-class MessageAdapter(private val messages: List<MessageItem>) :
-    RecyclerView.Adapter<RecyclerView.ViewHolder>() {
+class MessageAdapter(
+    private val messages: List<MessageItem>,
+    private val fragmentManager: FragmentManager
+) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
     companion object {
         private const val VIEW_TYPE_SENT = 1
@@ -46,241 +54,265 @@ class MessageAdapter(private val messages: List<MessageItem>) :
 
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
         val messageItem = messages[position]
-        val formattedTime = android.text.format.DateFormat.format("hh:mm a", messageItem.timestamp).toString()
 
-        if (messageItem.progress >= 0) { // If progress is being tracked
-            if (holder is ReceivedMessageViewHolder) {
-                holder.timestampTextView.text = formattedTime
-                holder.progressTextView.visibility = View.VISIBLE
-                holder.progressTextView.text = "Loading... ${messageItem.progress}%"
-                holder.messageImageView.visibility = View.VISIBLE
-                holder.messageTextView.visibility = View.GONE
-                holder.timestampTextView.text = formattedTime
-                holder.messageImageView.setOnClickListener {
-                    val context = holder.itemView.context
-                    val imageUri = Uri.parse(messageItem.imageUri) // Assuming it's a valid URI
-                    val intent = Intent(Intent.ACTION_VIEW).apply {
-                        setDataAndType(imageUri, "image/*")
-                        flags = Intent.FLAG_GRANT_READ_URI_PERMISSION // Ensure permission to read
+        // Format the timestamp
+        val timestampFormat = SimpleDateFormat("hh:mm", Locale.getDefault())
+        val formattedTime = timestampFormat.format(Date(messageItem.timestamp))
+
+        when {
+            messageItem.contactName != null && messageItem.contactPhone != null -> {
+                if (holder is SentMessageViewHolder) {
+                    holder.contactLayout.visibility = View.VISIBLE
+                    holder.contactName.text = messageItem.contactName
+                    holder.messageImageView.visibility = View.GONE
+                    holder.messageTextView.visibility = View.GONE
+                    holder.documentLayout.visibility = View.GONE
+                    holder.frameLayout.visibility = View.GONE
+                    holder.messageTimestamp.text = formattedTime
+
+                    holder.detailsButton.setOnClickListener {
+                        val contactName = messageItem.contactName ?: "Unknown"
+                        val contactPhone = messageItem.contactPhone ?: "Unknown"
+
+                        val dialog = ContactDetailsDialogFragment.newInstance(contactName, contactPhone)
+                        dialog.show(fragmentManager, "ContactDetailsDialog")
                     }
-                    try {
-                        context.startActivity(intent) // Open the image in an external app
-                    } catch (e: Exception) {
-                        // Handle exception (e.g., no app to handle the intent)
-                        Log.e("ImageOpenError", "No app available to view the image: $e")
+                } else if (holder is ReceivedMessageViewHolder) {
+                    holder.contactLayout.visibility = View.VISIBLE
+                    holder.contactName.text = messageItem.contactName
+                    holder.messageImageView.visibility = View.GONE
+                    holder.frameLayout.visibility = View.GONE
+                    holder.messageTextView.visibility = View.GONE
+                    holder.documentLayout.visibility = View.GONE
+                    holder.messageTimestamp.text = formattedTime
+
+                    holder.detailsButton.setOnClickListener {
+                        val contactName = messageItem.contactName ?: "Unknown"
+                        val contactPhone = messageItem.contactPhone ?: "Unknown"
+
+                        val dialog = ContactDetailsDialogFragment.newInstance(contactName, contactPhone)
+                        dialog.show(fragmentManager, "ContactDetailsDialog")
                     }
                 }
-
-
-                if (messageItem.progress == 100) {
-                    holder.timestampTextView.text = formattedTime
-                    holder.progressTextView.visibility = View.GONE // Hide progress view
-                    holder.messageImageView.visibility = View.VISIBLE // Show image
-                    holder.messageCardView.visibility = View.GONE
+            }
+            messageItem.documentUri != null -> { // Display document message
+                if (holder is SentMessageViewHolder) {
+                    holder.documentLayout.visibility = View.VISIBLE
+                    holder.documentName.text = messageItem.documentName
+                    holder.messageImageView.visibility = View.GONE
                     holder.messageTextView.visibility = View.GONE
-                    holder.timestampTextView.text = formattedTime
+                    holder.videoIcon.visibility = View.GONE
+                    holder.frameLayout.visibility = View.GONE
+                    holder.messageTimestamp.text = formattedTime
+
+                    // Handle document click (if necessary)
+                    holder.documentLayout.setOnClickListener {
+                        openDocument(holder.itemView.context, messageItem.documentUri)
+                    }
+                } else if (holder is ReceivedMessageViewHolder) {
+                    holder.documentLayout.visibility = View.VISIBLE
+                    holder.documentName.text = messageItem.documentName
+                    holder.messageImageView.visibility = View.GONE
+                    holder.messageTextView.visibility = View.GONE
+                    holder.videoIcon.visibility = View.GONE
+                    holder.frameLayout.visibility = View.GONE
+                    holder.messageTimestamp.text = formattedTime
+
+                    // Handle document click (if necessary)
+                    holder.documentLayout.setOnClickListener {
+                        openDocument(holder.itemView.context, messageItem.documentUri)
+                    }
+                }
+            }
+
+            messageItem.imageUri != null -> { // Display image from URI
+                if (holder is SentMessageViewHolder) {
                     Glide.with(holder.itemView.context)
                         .load(messageItem.imageUri)
                         .placeholder(R.drawable.loading_2_svgrepo_com)
-                        .error(R.drawable.loading_2_svgrepo_com) // Add error fallback
+                        .into(holder.messageImageView)
+                    holder.messageTextView.visibility = View.GONE
+                    holder.messageImageView.visibility = View.VISIBLE
+                    holder.messageTimestamp.text = formattedTime
+
+                    holder.messageImageView.setOnClickListener {
+                        showImagePreview(messageItem.imageUri)
+                    }
+
+                    // Hide video icon for image message
+                    holder.videoIcon.visibility = View.GONE
+                } else if (holder is ReceivedMessageViewHolder) {
+                    Glide.with(holder.itemView.context)
+                        .load(messageItem.imageUri)
+                        .placeholder(R.drawable.loading_2_svgrepo_com)
+                        .into(holder.messageImageView)
+                    holder.messageTextView.visibility = View.GONE
+                    holder.messageImageView.visibility = View.VISIBLE
+                    holder.messageTimestamp.text = formattedTime
+
+                    holder.messageImageView.setOnClickListener {
+                        showImagePreview(messageItem.imageUri)
+                    }
+
+                    // Hide video icon for image message
+                    holder.videoIcon.visibility = View.GONE
+                }
+            }
+
+            messageItem.videoUri != null -> { // Display video
+                if (holder is SentMessageViewHolder) {
+                    Glide.with(holder.itemView.context)
+                        .load(messageItem.videoUri) // Load video thumbnail
+                        .placeholder(R.drawable.loading_2_svgrepo_com)
                         .into(holder.messageImageView)
 
-                    messageItem.progress = -1 // Reset progress to avoid repeated updates
-
-
-                }
-            }
-        } else if (messageItem.imageUri != null) { // Display image if no progress is tracked
-            if (holder is SentMessageViewHolder) {
-                Glide.with(holder.itemView.context)
-                    .load(messageItem.imageUri)
-                    .placeholder(R.drawable.loading_2_svgrepo_com)
-                    .error(R.drawable.loading_2_svgrepo_com) // Add error fallback
-                    .into(holder.messageImageView)
-
-                holder.messageImageView.visibility = View.VISIBLE
-                holder.messageTextView.visibility = View.GONE
-                holder.timestampTextView.text = formattedTime
-                holder.messageImageView.setOnClickListener {
-                    val context = holder.itemView.context
-                    val imageUri = Uri.parse(messageItem.imageUri) // Assuming it's a valid URI
-                    val intent = Intent(Intent.ACTION_VIEW).apply {
-                        setDataAndType(imageUri, "image/*")
-                        flags = Intent.FLAG_GRANT_READ_URI_PERMISSION // Ensure permission to read
-                    }
-                    try {
-                        context.startActivity(intent) // Open the image in an external app
-                    } catch (e: Exception) {
-                        // Handle exception (e.g., no app to handle the intent)
-                        Log.e("ImageOpenError", "No app available to view the image: $e")
-                    }
-                }
-
-            } else if (holder is ReceivedMessageViewHolder) {
-                Glide.with(holder.itemView.context)
-                    .load(messageItem.imageUri)
-                    .placeholder(R.drawable.loading_2_svgrepo_com)
-                    .error(R.drawable.loading_2_svgrepo_com) // Add error fallback
-                    .into(holder.messageImageView)
-
-                holder.messageImageView.visibility = View.VISIBLE
-                holder.messageTextView.visibility = View.GONE
-                holder.progressTextView.visibility = View.GONE
-                holder.messageCardView.visibility = View.VISIBLE
-                holder.timestampTextView.text = formattedTime
-                holder.messageImageView.setOnClickListener {
-                    val context = holder.itemView.context
-                    val imageUri = Uri.parse(messageItem.imageUri) // Assuming it's a valid URI
-                    val intent = Intent(Intent.ACTION_VIEW).apply {
-                        setDataAndType(imageUri, "image/*")
-                        flags = Intent.FLAG_GRANT_READ_URI_PERMISSION // Ensure permission to read
-                    }
-                    try {
-                        context.startActivity(intent) // Open the image in an external app
-                    } catch (e: Exception) {
-                        // Handle exception (e.g., no app to handle the intent)
-                        Log.e("ImageOpenError", "No app available to view the image: $e")
-                    }
-                }
-            }
-        }
-        else if (messageItem.message != null) { // Display text if available
-            if (holder is SentMessageViewHolder) {
-                holder.messageTextView.text = messageItem.message
-                holder.messageImageView.visibility = View.GONE
-                holder.messageVideoView.visibility = View.GONE
-                holder.messageTextView.visibility = View.VISIBLE
-                holder.messageCardView.visibility = View.GONE
-                holder.timestampTextView.text = formattedTime
-                holder.messageImageView.setOnClickListener {
-                    val context = holder.itemView.context
-                    val imageUri = Uri.parse(messageItem.imageUri) // Assuming it's a valid URI
-                    val intent = Intent(Intent.ACTION_VIEW).apply {
-                        setDataAndType(imageUri, "image/*")
-                        flags = Intent.FLAG_GRANT_READ_URI_PERMISSION // Ensure permission to read
-                    }
-                    try {
-                        context.startActivity(intent) // Open the image in an external app
-                    } catch (e: Exception) {
-                        // Handle exception (e.g., no app to handle the intent)
-                        Log.e("ImageOpenError", "No app available to view the image: $e")
-                    }
-                }
-
-            } else if (holder is ReceivedMessageViewHolder) {
-                holder.messageTextView.text = messageItem.message
-                holder.messageImageView.visibility = View.GONE
-                holder.messageTextView.visibility = View.VISIBLE
-                holder.progressTextView.visibility = View.GONE
-                holder.messageCardView.visibility = View.GONE
-                holder.timestampTextView.text = formattedTime
-                holder.messageImageView.setOnClickListener {
-                    val context = holder.itemView.context
-                    val imageUri = Uri.parse(messageItem.imageUri) // Assuming it's a valid URI
-                    val intent = Intent(Intent.ACTION_VIEW).apply {
-                        setDataAndType(imageUri, "image/*")
-                        flags = Intent.FLAG_GRANT_READ_URI_PERMISSION // Ensure permission to read
-                    }
-                    try {
-                        context.startActivity(intent) // Open the image in an external app
-                    } catch (e: Exception) {
-                        // Handle exception (e.g., no app to handle the intent)
-                        Log.e("ImageOpenError", "No app available to view the image: $e")
-                    }
-                }
-            }
-        }
-        else if (messageItem.videoUri != null) { // Display video if URI exists
-            val videoUri = Uri.parse(messageItem.videoUri)
-
-            val thumbnail = ThumbnailUtils.createVideoThumbnail(
-                videoUri.path!!,
-                MediaStore.Images.Thumbnails.MINI_KIND
-            )
-
-            if (thumbnail == null) {
-                Log.e("ThumbnailError", "Failed to generate thumbnail for video: ${videoUri.path}")
-            }
-
-            if (holder is SentMessageViewHolder) {
-                Glide.with(holder.itemView.context)
-                    .load(messageItem.videoThumbnail ?: thumbnail)
-                    .placeholder(R.drawable.loading_2_svgrepo_com)
-                    .into(holder.messageVideoView)
-
-
-                if (messageItem.videoUri != null) {
-                    holder.messageImageView.visibility = View.GONE
                     holder.messageTextView.visibility = View.GONE
-                    holder.messageCardView.visibility = View.GONE
-                    holder.messageVideoView.visibility = View.GONE
-                    holder.messageVideoView.setImageBitmap(messageItem.videoThumbnail)
+                    holder.messageImageView.visibility = View.VISIBLE
+                    holder.messageTimestamp.text = formattedTime
 
-                    holder.messageVideoView.setOnClickListener {
-                        val context = holder.itemView.context
-                        val videoUri = Uri.parse(messageItem.videoUri)
-                        val intent = Intent(Intent.ACTION_VIEW).apply {
-                            setDataAndType(videoUri, "video/*")
-                        }
-                        context.startActivity(intent)
+                    holder.messageImageView.setOnClickListener {
+                        showVideoPreview(messageItem.videoUri)
                     }
-                }
 
-            }
-            else if (holder is ReceivedMessageViewHolder) {
-                Glide.with(holder.itemView.context)
-                    .load(messageItem.videoThumbnail ?: thumbnail)
-                    .placeholder(R.drawable.loading_2_svgrepo_com)
-                    .into(holder.messageVideoView)
+                    // Show video icon for video message
+                    holder.videoIcon.visibility = View.VISIBLE
+                } else if (holder is ReceivedMessageViewHolder) {
+                    Glide.with(holder.itemView.context)
+                        .load(messageItem.videoUri) // Load video thumbnail
+                        .placeholder(R.drawable.loading_2_svgrepo_com)
+                        .into(holder.messageImageView)
 
-                holder.messageImageView.visibility = View.GONE
-                holder.messageTextView.visibility = View.GONE
-                holder.messageVideoView.visibility = View.VISIBLE
-                holder.progressTextView.visibility = View.GONE
-                holder.messageCardView.visibility = View.VISIBLE
-                holder.timestampTextView.text = formattedTime
+                    holder.messageTextView.visibility = View.GONE
+                    holder.messageImageView.visibility = View.VISIBLE
+                    holder.messageTimestamp.text = formattedTime
 
-                holder.messageVideoView.setOnClickListener {
-                    val context = holder.itemView.context
-                    val intent = Intent(Intent.ACTION_VIEW).apply {
-                        setDataAndType(videoUri, "video/*")
+                    holder.messageImageView.setOnClickListener {
+                        showVideoPreview(messageItem.videoUri)
                     }
-                    context.startActivity(intent)
+
+                    // Show video icon for video message
+                    holder.videoIcon.visibility = View.VISIBLE
                 }
             }
-        }
 
+            messageItem.imageBitmap != null -> { // Fallback to bitmap if URI is not available
+                val byteArray = bitmapToByteArray(messageItem.imageBitmap)
 
+                if (holder is SentMessageViewHolder) {
+                    Glide.with(holder.itemView.context)
+                        .load(byteArray)
+                        .placeholder(R.drawable.loading_2_svgrepo_com)
+                        .into(holder.messageImageView)
+                    holder.messageTextView.visibility = View.GONE
+                    holder.messageImageView.visibility = View.VISIBLE
+                    holder.messageTimestamp.text = formattedTime
 
-        else { // Handle invalid/empty messages
-            if (holder is SentMessageViewHolder) {
-                holder.messageTextView.visibility = View.GONE
-                holder.messageImageView.visibility = View.GONE
-                holder.messageCardView.visibility = View.GONE
-            } else if (holder is ReceivedMessageViewHolder) {
-                holder.messageTextView.visibility = View.GONE
-                holder.messageImageView.visibility = View.GONE
-                holder.progressTextView.visibility = View.GONE
-                holder.messageCardView.visibility = View.GONE
+                    holder.messageImageView.setOnClickListener {
+                        showImagePreview(null, byteArray)
+                    }
+
+                    // Hide video icon for image message
+                    holder.videoIcon.visibility = View.GONE
+                } else if (holder is ReceivedMessageViewHolder) {
+                    Glide.with(holder.itemView.context)
+                        .load(byteArray)
+                        .placeholder(R.drawable.loading_2_svgrepo_com)
+                        .into(holder.messageImageView)
+                    holder.messageTextView.visibility = View.GONE
+                    holder.messageImageView.visibility = View.VISIBLE
+                    holder.messageTimestamp.text = formattedTime
+
+                    holder.messageImageView.setOnClickListener {
+                        showImagePreview(null, byteArray)
+                    }
+
+                    // Hide video icon for image message
+                    holder.videoIcon.visibility = View.GONE
+                }
+            }
+
+            messageItem.message != null -> { // Display text message
+                if (holder is SentMessageViewHolder) {
+                    holder.messageTextView.text = messageItem.message
+                    holder.messageImageView.visibility = View.GONE
+                    holder.frameLayout.visibility = View.GONE
+                    holder.messageTextView.visibility = View.VISIBLE
+                    holder.messageTimestamp.text = formattedTime
+
+                    // Hide video icon for text message
+                    holder.videoIcon.visibility = View.GONE
+                } else if (holder is ReceivedMessageViewHolder) {
+                    holder.messageTextView.text = messageItem.message
+                    holder.messageImageView.visibility = View.GONE
+                    holder.frameLayout.visibility = View.GONE
+                    holder.messageTextView.visibility = View.VISIBLE
+                    holder.messageTimestamp.text = formattedTime
+
+                    // Hide video icon for text message
+                    holder.videoIcon.visibility = View.GONE
+                }
             }
         }
     }
+
     override fun getItemCount(): Int = messages.size
 
+    private fun bitmapToByteArray(bitmap: Bitmap): ByteArray {
+        val stream = ByteArrayOutputStream()
+        bitmap.compress(Bitmap.CompressFormat.PNG, 100, stream)
+        return stream.toByteArray()
+    }
+
+    private fun showImagePreview(imageUri: String? = null, imageByteArray: ByteArray? = null) {
+        val previewFragment = ImagePreviewFragment.newInstance(imageUri, imageByteArray)
+        previewFragment.show(fragmentManager, "ImagePreviewFragment")
+    }
+
+    private fun showVideoPreview(videoUri: String?) {
+        val videoPreviewFragment = VideoPreviewFragment.newInstance(videoUri)
+        videoPreviewFragment.show(fragmentManager, "VideoPreviewFragment")
+    }
+
+    private fun openDocument(context: Context, documentUri: String?) {
+        documentUri?.let {
+            val intent = Intent(Intent.ACTION_VIEW, Uri.parse(it))
+            intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
+            context.startActivity(intent)
+        }
+    }
+
+//    private fun navigateToContactDetails(view: View, bundle: Bundle) {
+//        val navController = view.findNavController()
+//        navController.navigate(R.id.action_currentFragment_to_contactDetailsFragment, bundle)
+//    }
+
+
+
     inner class SentMessageViewHolder(view: View) : RecyclerView.ViewHolder(view) {
-        val messageTextView: TextView = view.findViewById(R.id.message_text)
-        val messageImageView: ImageView = view.findViewById(R.id.message_image)
-        val messageCardView : CardView = view.findViewById(R.id.message_card)
-        val timestampTextView: TextView = view.findViewById(R.id.message_timestamp)
-        val messageVideoView: ImageView = view.findViewById(R.id.message_image)
+        val messageTextView: TextView = view.findViewById(R.id.textMessage)
+        val messageImageView: ImageView = view.findViewById(R.id.imageMessage)
+        val messageTimestamp: TextView = view.findViewById(R.id.messageTimestamp)
+        val videoIcon: ImageView = view.findViewById(R.id.videoIcon)
+        val frameLayout: FrameLayout = view.findViewById(R.id.frameLayout)
+        val progressBar: ProgressBar = view.findViewById(R.id.imageProgressBar)
+        val documentLayout: LinearLayout = view.findViewById(R.id.documentLayout)
+        val documentName: TextView = view.findViewById(R.id.documentName)
+        val contactLayout: LinearLayout = view.findViewById(R.id.contactLayout)
+        val contactName: TextView = view.findViewById(R.id.contactName)
+        val detailsButton: TextView = view.findViewById(R.id.detailsButton)
     }
 
     inner class ReceivedMessageViewHolder(view: View) : RecyclerView.ViewHolder(view) {
-        val messageTextView: TextView = view.findViewById(R.id.message_text)
-        val messageImageView: ImageView = view.findViewById(R.id.message_image)
-        val messageCardView : CardView = view.findViewById(R.id.message_card)
-        val progressTextView :  TextView = view.findViewById(R.id.progress_text)
-        val timestampTextView: TextView = view.findViewById(R.id.message_timestamp)
-        val messageVideoView: ImageView = view.findViewById(R.id.message_image)
+        val messageTextView: TextView = view.findViewById(R.id.textMessage)
+        val messageImageView: ImageView = view.findViewById(R.id.imageMessage)
+        val messageTimestamp: TextView = view.findViewById(R.id.messageTimestamp)
+        val frameLayout: FrameLayout = view.findViewById(R.id.frameLayout)
+        val videoIcon: ImageView = view.findViewById(R.id.videoIcon)
+        val progressBar: ProgressBar = view.findViewById(R.id.imageProgressBar)
+        val documentLayout: LinearLayout = view.findViewById(R.id.documentLayout)
+        val documentName: TextView = view.findViewById(R.id.documentName)
+        val contactLayout: LinearLayout = view.findViewById(R.id.contactLayout)
+        val contactName: TextView = view.findViewById(R.id.contactName)
+        val detailsButton: TextView = view.findViewById(R.id.detailsButton)
     }
 }

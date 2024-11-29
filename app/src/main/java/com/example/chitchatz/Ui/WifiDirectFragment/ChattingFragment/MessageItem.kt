@@ -3,12 +3,15 @@ package com.example.chitchatz.Ui.WifiDirectFragment.ChattingFragment
 import android.graphics.Bitmap
 
 data class MessageItem(
-    val message: String? = null,   // For text messages
-    val isMe: Boolean = false,
-    var imageUri: String? = null,// For identifying if the message is sent by the current user
+    val message: String? = null,
     val imageBitmap: Bitmap? = null,
-    var videoThumbnail: Bitmap? = null,
-    var videoUri: String? = null,
-    var progress: Int = -1,
+    val imageUri: String? = null,
+    val videoUri: String? = null,
+    val videoThumbnail: Bitmap? = null,
+    val isMe: Boolean = false,
+    val documentName: String? = null,
+    val documentUri: String? = null,
+    val contactName: String? = null,
+    val contactPhone: String? = null,
     val timestamp: Long = System.currentTimeMillis()
 )
