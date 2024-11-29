@@ -53,6 +53,7 @@ class WiFiDirectViewModel : ViewModel() {
             addAction(WifiP2pManager.WIFI_P2P_THIS_DEVICE_CHANGED_ACTION)
         }
         context.registerReceiver(broadcastReceiver, intentFilter)
+        disconnect()
     }
 
     fun unregisterReceiver(context: Context) {
@@ -67,6 +68,17 @@ class WiFiDirectViewModel : ViewModel() {
 
             override fun onFailure(reason: Int) {
                 _errorMessage.postValue("Peer discovery failed: $reason")
+            }
+        })
+    }
+    fun disconnect() {
+        wifiP2pManager.removeGroup(channel, object : WifiP2pManager.ActionListener {
+            override fun onSuccess() {
+                _connectionStatus.postValue("Disconnected")
+            }
+
+            override fun onFailure(reason: Int) {
+                _errorMessage.postValue("Failed to disconnect: $reason")
             }
         })
     }

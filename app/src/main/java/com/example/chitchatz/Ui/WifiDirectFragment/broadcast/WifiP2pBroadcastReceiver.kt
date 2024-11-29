@@ -1,5 +1,4 @@
 package com.example.chitchatz.Ui.WifiDirectFragment.broadcast
-
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
@@ -32,7 +31,9 @@ class WifiP2pBroadcastReceiver(
             WifiP2pManager.WIFI_P2P_CONNECTION_CHANGED_ACTION -> {
                 val networkInfo =
                     intent.getParcelableExtra<android.net.NetworkInfo>(WifiP2pManager.EXTRA_NETWORK_INFO)
+
                 if (networkInfo != null && networkInfo.isConnected) {
+                    // Connected: Handle group formation and navigation
                     Log.d("WiFiP2P", "Connection changed: connected")
                     manager.requestConnectionInfo(channel) { info ->
                         if (info.groupFormed) {
@@ -46,12 +47,24 @@ class WifiP2pBroadcastReceiver(
                                 putString("groupOwnerAddress", groupOwnerAddress)
                             }
 
-
                             navController?.navigate(R.id.action_wiFiDirectFragment_to_chattingFragment, bundle)
                         }
                     }
                 } else {
+                    // Disconnected: Handle connection loss and remove group
                     Log.d("WiFiP2P", "Connection changed: disconnected")
+                    manager.removeGroup(channel, object : WifiP2pManager.ActionListener {
+                        override fun onSuccess() {
+                            Log.d("WiFiP2P", "Group removed successfully after disconnection")
+                            val navController = (context as? MainActivity)?.findNavController(R.id.nav_host_fragment)
+                            navController?.navigate(R.id.action_chattingFragment_to_wiFiDirectFragment)
+
+                        }
+
+                        override fun onFailure(reason: Int) {
+                            Log.e("WiFiP2P", "Failed to remove group: $reason")
+                        }
+                    })
                 }
             }
             WifiP2pManager.WIFI_P2P_THIS_DEVICE_CHANGED_ACTION -> {

@@ -7,10 +7,10 @@
     android:padding="16dp">
 
     <ImageView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
         android:contentDescription="@string/app_name"
-        android:src="@drawable/img_6"
+        android:src="@drawable/contact_phonebook_support_svgrepo_com"
         android:layout_gravity="center_horizontal"
         />
 
@@ -36,7 +36,7 @@
         android:id="@+id/saveNumber"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="add_to_contact"
+        android:text="Add to Contact"
         android:layout_gravity="center"
         android:layout_marginTop="10dp"
         android:background="@drawable/buttonborder"

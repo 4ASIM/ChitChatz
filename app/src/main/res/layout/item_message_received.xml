@@ -92,7 +92,7 @@
         android:layout_height="wrap_content"
         android:gravity="center_horizontal"
         android:orientation="vertical"
-        android:background="@drawable/buttonborder"
+        android:background="@drawable/buttonborder2"
         android:padding="16dp"
         android:visibility="gone">
 
@@ -108,6 +108,7 @@
                 android:id="@+id/contactImage"
                 android:layout_width="25dp"
                 android:layout_height="25dp"
+                android:src="@drawable/contact_phonebook_support_svgrepo_com"
                 android:contentDescription="@string/app_name"
                 />
             <!-- Contact Name -->

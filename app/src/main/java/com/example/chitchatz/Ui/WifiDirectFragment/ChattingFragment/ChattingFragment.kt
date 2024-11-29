@@ -128,11 +128,11 @@ class ChattingFragment : Fragment(R.layout.fragment_chatting) {
             startActivityForResult(intent, REQUEST_DOCUMENT_PICK)
         }
 
-        // Contact Picker FAB
-//        binding.contactFabBtn.setOnClickListener {
-//            val intent = Intent(Intent.ACTION_PICK, ContactsContract.Contacts.CONTENT_URI)
-//            startActivityForResult(intent, REQUEST_CONTACT_PICK)
-//        }
+
+        binding.ContactFabBtn.setOnClickListener {
+            val intent = Intent(Intent.ACTION_PICK, ContactsContract.Contacts.CONTENT_URI)
+            startActivityForResult(intent, REQUEST_CONTACT_PICK)
+        }
 
         // Main FAB (Collapse or Expand Menu)
         binding.mainFabBtn.setOnClickListener {
@@ -145,11 +145,11 @@ class ChattingFragment : Fragment(R.layout.fragment_chatting) {
         binding.galleryFabBtn.startAnimation(fromBottomFabAnim)
         binding.shareFabBtn.startAnimation(fromBottomFabAnim)
         binding.sendFabBtn.startAnimation(fromBottomFabAnim)
-//        binding.contactFabBtn.startAnimation(fromBottomFabAnim)
+       binding.ContactFabBtn.startAnimation(fromBottomFabAnim)
         binding.galleryFabBtn.visibility = View.VISIBLE
         binding.shareFabBtn.visibility = View.VISIBLE
         binding.sendFabBtn.visibility = View.VISIBLE
-//        binding.contactFabBtn.visibility = View.VISIBLE
+       binding.ContactFabBtn.visibility = View.VISIBLE
         isExpanded = true
     }
 
@@ -158,11 +158,11 @@ class ChattingFragment : Fragment(R.layout.fragment_chatting) {
         binding.galleryFabBtn.startAnimation(toBottomFabAnim)
         binding.shareFabBtn.startAnimation(toBottomFabAnim)
         binding.sendFabBtn.startAnimation(toBottomFabAnim)
-//        binding.contactFabBtn.startAnimation(toBottomFabAnim)
+       binding.ContactFabBtn.startAnimation(toBottomFabAnim)
         binding.galleryFabBtn.visibility = View.GONE
         binding.shareFabBtn.visibility = View.GONE
         binding.sendFabBtn.visibility = View.GONE
-//        binding.contactFabBtn.visibility = View.GONE
+        binding.ContactFabBtn.visibility = View.GONE
         isExpanded = false
     }
 
