@@ -23,6 +23,8 @@ import com.example.chitchatz.R
 import com.example.chitchatz.databinding.FragmentChattingBinding
 import java.io.DataInputStream
 import java.io.DataOutputStream
+import java.io.File
+import java.io.FileOutputStream
 import java.io.IOException
 import java.net.ServerSocket
 import java.net.Socket
@@ -283,14 +285,15 @@ class ChattingFragment : Fragment(R.layout.fragment_chatting) {
         try {
             val thumbnail = getVideoThumbnail(videoUri) // Generate thumbnail
             val videoBytes = requireContext().contentResolver.openInputStream(videoUri)?.readBytes()
-            val videoSize = videoBytes?.size ?: 0
-            sendVideo(videoUri, videoBytes, videoSize)
+            val videoSize = videoBytes?.size?.toLong() ?: 0L  // Convert video size to Long
+            sendVideo(videoUri, videoBytes, videoSize)  // Pass Long size to sendVideo
 
             addMessage(null, true, videoUri = videoUri.toString(), videoThumbnail = thumbnail)
         } catch (e: IOException) {
             e.printStackTrace()
         }
     }
+
 
     private fun getVideoThumbnail(videoUri: Uri): Bitmap? {
         return try {
@@ -332,21 +335,21 @@ class ChattingFragment : Fragment(R.layout.fragment_chatting) {
         }
     }
 
-    private fun sendVideo(videoUri: Uri, videoBytes: ByteArray?, videoSize: Int) {
+    private fun sendVideo(videoUri: Uri, videoBytes: ByteArray?, videoSize: Long) {
         thread {
             try {
                 socket?.getOutputStream()?.let { outputStream ->
                     val dataOutputStream = DataOutputStream(outputStream)
                     dataOutputStream.writeUTF("VIDEO")
-                    dataOutputStream.writeInt(videoSize)
+                    dataOutputStream.writeLong(videoSize) // Use writeLong instead of writeInt for video size
 
                     // Send the video in chunks
-                    var offset = 0
-                    val chunkSize = 1024
+                    var offset = 0L // Change to Long
+                    val chunkSize = 1024L // Change to Long
                     while (offset < videoSize) {
                         val sizeToSend = (videoSize - offset).coerceAtMost(chunkSize)
-                        dataOutputStream.writeInt(sizeToSend)
-                        dataOutputStream.write(videoBytes, offset, sizeToSend)
+                        dataOutputStream.writeLong(sizeToSend) // Use writeLong instead of writeInt for chunk size
+                        dataOutputStream.write(videoBytes, offset.toInt(), sizeToSend.toInt()) // Convert offset and sizeToSend back to Int for byte array
                         offset += sizeToSend
                     }
                 }
@@ -355,6 +358,7 @@ class ChattingFragment : Fragment(R.layout.fragment_chatting) {
             }
         }
     }
+
 
     private fun sendDocument(documentUri: Uri, documentName: String) {
         thread {
@@ -503,20 +507,37 @@ class ChattingFragment : Fragment(R.layout.fragment_chatting) {
                             }
 
                             "VIDEO" -> {
-                                val videoSize = dataInputStream.readInt()
-                                val videoBytes = ByteArray(videoSize)
-                                var offset = 0
+                                val videoSize =
+                                    dataInputStream.readLong() // Change to readLong for video size
+                                if (videoSize <= 0) throw IOException("Invalid video size: $videoSize")
+
+                                val videoFile = File(
+                                    requireContext().filesDir,
+                                    "received_video_${System.currentTimeMillis()}.mp4"
+                                )
+                                val outputStream = FileOutputStream(videoFile)
+
+                                var offset = 0L // Change to Long
                                 while (offset < videoSize) {
-                                    val chunkSize = dataInputStream.readInt()
-                                    dataInputStream.readFully(videoBytes, offset, chunkSize)
+                                    val chunkSize =
+                                        dataInputStream.readLong() // Change to readLong for chunk size
+                                    if (chunkSize <= 0 || chunkSize > (videoSize - offset)) {
+                                        throw IOException("Invalid chunk size received: $chunkSize")
+                                    }
+
+                                    val buffer =
+                                        ByteArray(chunkSize.toInt()) // Convert Long to Int for buffer
+                                    dataInputStream.readFully(buffer, 0, chunkSize.toInt())
+                                    outputStream.write(buffer)
                                     offset += chunkSize
                                 }
-                                saveVideoToDeviceStorage(videoBytes)?.let { videoPath ->
-                                    activity?.runOnUiThread {
-                                        addMessage(null, false, videoUri = videoPath)
-                                    }
+
+                                outputStream.close()
+                                activity?.runOnUiThread {
+                                    addMessage(null, false, videoUri = videoFile.absolutePath)
                                 }
                             }
+
                             "DOCUMENT" -> {
                                 val documentName = dataInputStream.readUTF()
                                 val documentSize = dataInputStream.readInt()
