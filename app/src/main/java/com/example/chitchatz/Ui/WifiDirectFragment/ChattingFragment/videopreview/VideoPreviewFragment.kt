@@ -1,4 +1,4 @@
-package com.example.pingme.ui.videopreview
+package com.example.chitchatz.Ui.WifiDirectFragment.ChattingFragment.videopreview
 
 import android.net.Uri
 import android.os.Bundle

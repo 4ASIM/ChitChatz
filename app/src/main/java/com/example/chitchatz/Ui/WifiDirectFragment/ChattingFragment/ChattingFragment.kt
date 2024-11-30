@@ -21,7 +21,6 @@ import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.chitchatz.R
 import com.example.chitchatz.databinding.FragmentChattingBinding
-import com.example.pingme.ui.bottomsheet.OptionsBottomSheet
 import java.io.DataInputStream
 import java.io.DataOutputStream
 import java.io.IOException

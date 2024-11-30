@@ -1,4 +1,4 @@
-package com.example.pingme.ui.imagepreview
+package com.example.chitchatz.Ui.WifiDirectFragment.ChattingFragment.imagepreview
 
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory

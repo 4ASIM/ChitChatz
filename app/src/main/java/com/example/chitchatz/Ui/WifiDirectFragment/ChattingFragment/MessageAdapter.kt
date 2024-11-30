@@ -20,9 +20,9 @@ import androidx.navigation.findNavController
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.example.chitchatz.R
-import com.example.pingme.ui.contactpreview.ContactDetailsDialogFragment
-import com.example.pingme.ui.imagepreview.ImagePreviewFragment
-import com.example.pingme.ui.videopreview.VideoPreviewFragment
+import com.example.chitchatz.Ui.WifiDirectFragment.ChattingFragment.contactpreview.ContactDetailsDialogFragment
+import com.example.chitchatz.Ui.WifiDirectFragment.ChattingFragment.imagepreview.ImagePreviewFragment
+import com.example.chitchatz.Ui.WifiDirectFragment.ChattingFragment.videopreview.VideoPreviewFragment
 import java.io.ByteArrayOutputStream
 import java.text.SimpleDateFormat
 import java.util.*

@@ -1,4 +1,4 @@
-package com.example.pingme.ui.contactpreview
+package com.example.chitchatz.Ui.WifiDirectFragment.ChattingFragment.contactpreview
 
 import android.content.Intent
 import android.provider.ContactsContract
