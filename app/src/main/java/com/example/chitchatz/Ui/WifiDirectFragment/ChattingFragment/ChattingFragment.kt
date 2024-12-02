@@ -344,7 +344,7 @@ class ChattingFragment : Fragment(R.layout.fragment_chatting) {
             try {
                 socket?.getOutputStream()?.let { outputStream ->
                     val dataOutputStream = DataOutputStream(outputStream)
-                    val buffer = ByteArray(1024 * 8) // 8KB buffer
+                    val buffer = ByteArray(1024 * 1024) // 1mb buffer
                     var bytesRead: Int
                     var totalBytesRead = 0L
 

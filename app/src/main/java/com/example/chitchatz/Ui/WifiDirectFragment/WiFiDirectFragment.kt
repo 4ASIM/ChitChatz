@@ -61,16 +61,12 @@ class WiFiDirectFragment : Fragment(R.layout.fragment_wi_fi_direct) {
                 animationView.cancelAnimation()
             }
         }
-//        viewModel.connectionStatus.observe(viewLifecycleOwner, Observer { status ->
-//            Toast.makeText(requireContext(), status, Toast.LENGTH_SHORT).show()
-//        })
+
         viewModel.errorMessage.observe(viewLifecycleOwner) { error ->
             animationView.visibility = View.GONE
             animationView.cancelAnimation()
         }
-//        viewModel.errorMessage.observe(viewLifecycleOwner, Observer { error ->
-//            Snackbar.make(binding.root, error, Snackbar.LENGTH_LONG).show()
-//        })
+
 
         // Search WiFi button action
         binding.btnSearchwifi.setOnClickListener {
