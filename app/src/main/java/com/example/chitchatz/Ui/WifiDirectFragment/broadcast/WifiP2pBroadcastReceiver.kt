@@ -56,8 +56,6 @@ class WifiP2pBroadcastReceiver(
                     manager.removeGroup(channel, object : WifiP2pManager.ActionListener {
                         override fun onSuccess() {
                             Log.d("WiFiP2P", "Group removed successfully after disconnection")
-                            val navController = (context as? MainActivity)?.findNavController(R.id.nav_host_fragment)
-                            navController?.navigate(R.id.action_chattingFragment_to_wiFiDirectFragment)
 
                         }
 
