@@ -29,7 +29,7 @@ class Splashscreen : Fragment() {
         fadeIn2.duration = 4000
         binding.appline.startAnimation(fadeIn2)
         Handler(Looper.getMainLooper()).postDelayed({
-            findNavController().navigate(R.id.action_splashScreenFragment_to_dashboardFragment)
+            findNavController().navigate(R.id.action_splashScreenFragment_to_wiFiDirectFragment)
         }, 5000)
 
         return binding.root

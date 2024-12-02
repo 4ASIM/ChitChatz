@@ -10,18 +10,14 @@
         android:name="com.example.chitchatz.Ui.Splashscreen"
         android:label="SplashScreen">
         <action
-            android:id="@+id/action_splashScreenFragment_to_dashboardFragment"
-            app:destination="@id/dashboardFragment" />
+            android:id="@+id/action_splashScreenFragment_to_wiFiDirectFragment"
+            app:destination="@id/wiFiDirectFragment" />
     </fragment>
 
     <fragment
         android:id="@+id/dashboardFragment"
         android:name="com.example.chitchatz.Ui.DashboardFragment.Dashboard"
-        android:label="Dashboard" >
-        <action
-            android:id="@+id/action_dashboardFragment_to_wiFiDirectFragment"
-            app:destination="@id/wiFiDirectFragment" />
-    </fragment>
+        android:label="Dashboard" />
     <fragment
         android:id="@+id/informationFragment"
         android:name="com.example.chitchatz.Ui.InformationFragment.InformationFragment"

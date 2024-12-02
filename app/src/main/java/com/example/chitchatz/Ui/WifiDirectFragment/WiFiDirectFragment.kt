@@ -4,6 +4,7 @@ import android.Manifest
 import android.content.pm.PackageManager
 import android.os.Bundle
 import android.util.Log
+import android.view.View
 import android.widget.Toast
 import androidx.core.app.ActivityCompat
 import androidx.fragment.app.Fragment
@@ -30,6 +31,7 @@ class WiFiDirectFragment : Fragment(R.layout.fragment_wi_fi_direct) {
     override fun onViewCreated(view: android.view.View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         _binding = FragmentWiFiDirectBinding.bind(view)
+        val animationView = binding.animationView
 
         // Initialize ViewModel
         viewModel.initialize(requireContext())
@@ -50,13 +52,25 @@ class WiFiDirectFragment : Fragment(R.layout.fragment_wi_fi_direct) {
             deviceAdapter.updateDevices(devices)
         }
 
-        viewModel.connectionStatus.observe(viewLifecycleOwner, Observer { status ->
-            Toast.makeText(requireContext(), status, Toast.LENGTH_SHORT).show()
-        })
-
-        viewModel.errorMessage.observe(viewLifecycleOwner, Observer { error ->
-            Snackbar.make(binding.root, error, Snackbar.LENGTH_LONG).show()
-        })
+        viewModel.connectionStatus.observe(viewLifecycleOwner) { status ->
+            if (status == "Peer discovery started successfully") {
+                animationView.visibility = View.VISIBLE
+                animationView.playAnimation()
+            } else if (status.contains("Connected") || status == "Disconnected") {
+                animationView.visibility = View.GONE
+                animationView.cancelAnimation()
+            }
+        }
+//        viewModel.connectionStatus.observe(viewLifecycleOwner, Observer { status ->
+//            Toast.makeText(requireContext(), status, Toast.LENGTH_SHORT).show()
+//        })
+        viewModel.errorMessage.observe(viewLifecycleOwner) { error ->
+            animationView.visibility = View.GONE
+            animationView.cancelAnimation()
+        }
+//        viewModel.errorMessage.observe(viewLifecycleOwner, Observer { error ->
+//            Snackbar.make(binding.root, error, Snackbar.LENGTH_LONG).show()
+//        })
 
         // Search WiFi button action
         binding.btnSearchwifi.setOnClickListener {
@@ -66,10 +80,22 @@ class WiFiDirectFragment : Fragment(R.layout.fragment_wi_fi_direct) {
                     LOCATION_PERMISSION_REQUEST_CODE
                 )
             } else {
+                animationView.visibility = View.VISIBLE
+                animationView.playAnimation()
                 viewModel.discoverPeers()
             }
         }
-
+        viewModel.deviceList.observe(viewLifecycleOwner) { devices ->
+            if (devices.isNotEmpty()) {
+                animationView.cancelAnimation()
+                animationView.visibility = View.GONE
+            }
+        }
+        viewModel.errorMessage.observe(viewLifecycleOwner) { error ->
+            animationView.cancelAnimation()
+            animationView.visibility = View.GONE
+            Snackbar.make(binding.root, error, Snackbar.LENGTH_LONG).show()
+        }
         // Register receiver
         viewModel.registerReceiver(requireContext())
     }
