@@ -56,6 +56,7 @@ class WiFiDirectViewModel : ViewModel() {
             }
             context.registerReceiver(broadcastReceiver, intentFilter)
             isReceiverRegistered = true
+            disconnect()
         }
     }
 

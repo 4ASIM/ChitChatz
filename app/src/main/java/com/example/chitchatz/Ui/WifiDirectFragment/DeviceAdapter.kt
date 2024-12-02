@@ -15,6 +15,7 @@ class DeviceAdapter(
     private var wifiP2pDeviceList: List<WifiP2pDevice>,
     private val onDeviceClick: (WifiP2pDevice) -> Unit,
 
+
     ) : RecyclerView.Adapter<DeviceAdapter.ViewHolder>() {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {

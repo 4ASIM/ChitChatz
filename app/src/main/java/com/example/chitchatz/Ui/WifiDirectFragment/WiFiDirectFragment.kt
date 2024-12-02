@@ -3,7 +3,6 @@ import android.provider.Settings
 import android.Manifest
 import android.content.Context
 import android.content.Intent
-import android.content.pm.PackageManager
 import android.location.LocationManager
 import android.os.Bundle
 import android.util.Log
@@ -14,6 +13,7 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.airbnb.lottie.LottieAnimationView
 import com.example.chitchatz.R
 import com.example.chitchatz.Ui.WifiDirectFragment.ChattingFragment.PermissionsUtil.PermissionsUtil
 import com.example.chitchatz.databinding.FragmentWiFiDirectBinding
@@ -26,7 +26,7 @@ class WiFiDirectFragment : Fragment(R.layout.fragment_wi_fi_direct) {
 
     private val viewModel: WiFiDirectViewModel by viewModels()
     private lateinit var deviceAdapter: DeviceAdapter
-
+    private lateinit var connectionLottie: LottieAnimationView
     companion object {
         const val LOCATION_PERMISSION_REQUEST_CODE = 1
         const val TAG = "WiFiDirectDemo"
@@ -36,6 +36,7 @@ class WiFiDirectFragment : Fragment(R.layout.fragment_wi_fi_direct) {
         super.onViewCreated(view, savedInstanceState)
         _binding = FragmentWiFiDirectBinding.bind(view)
         val animationView = binding.animationView
+        connectionLottie = binding.connectionLottie
 
         // Initialize ViewModel
         viewModel.initialize(requireContext())
@@ -43,6 +44,8 @@ class WiFiDirectFragment : Fragment(R.layout.fragment_wi_fi_direct) {
         // Set up RecyclerView
         deviceAdapter = DeviceAdapter(emptyList()) { selectedDevice ->
             Log.d(TAG, "Selected device: ${selectedDevice.deviceName} (${selectedDevice.deviceAddress})")
+            connectionLottie.visibility = View.VISIBLE
+            connectionLottie.playAnimation() // Play Lottie animation
             viewModel.connectToDevice(selectedDevice)
         }
 
