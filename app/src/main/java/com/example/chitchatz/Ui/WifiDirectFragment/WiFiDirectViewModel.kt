@@ -15,7 +15,6 @@ class WiFiDirectViewModel : ViewModel() {
     private lateinit var wifiP2pManager: WifiP2pManager
     private lateinit var channel: WifiP2pManager.Channel
     private lateinit var broadcastReceiver: WifiP2pBroadcastReceiver
-    private var isReceiverRegistered = false
 
     private val _deviceList = MutableLiveData<List<WifiP2pDevice>>()
     val deviceList: LiveData<List<WifiP2pDevice>> get() = _deviceList
@@ -47,23 +46,18 @@ class WiFiDirectViewModel : ViewModel() {
     }
 
     fun registerReceiver(context: Context) {
-        if (!isReceiverRegistered) {
-            val intentFilter = IntentFilter().apply {
-                addAction(WifiP2pManager.WIFI_P2P_STATE_CHANGED_ACTION)
-                addAction(WifiP2pManager.WIFI_P2P_PEERS_CHANGED_ACTION)
-                addAction(WifiP2pManager.WIFI_P2P_CONNECTION_CHANGED_ACTION)
-                addAction(WifiP2pManager.WIFI_P2P_THIS_DEVICE_CHANGED_ACTION)
-            }
-            context.registerReceiver(broadcastReceiver, intentFilter)
-            isReceiverRegistered = true
+        val intentFilter = IntentFilter().apply {
+            addAction(WifiP2pManager.WIFI_P2P_STATE_CHANGED_ACTION)
+            addAction(WifiP2pManager.WIFI_P2P_PEERS_CHANGED_ACTION)
+            addAction(WifiP2pManager.WIFI_P2P_CONNECTION_CHANGED_ACTION)
+            addAction(WifiP2pManager.WIFI_P2P_THIS_DEVICE_CHANGED_ACTION)
         }
+        context.registerReceiver(broadcastReceiver, intentFilter)
+        disconnect()
     }
 
     fun unregisterReceiver(context: Context) {
-        if (isReceiverRegistered) {
-            context.unregisterReceiver(broadcastReceiver)
-            isReceiverRegistered = false
-        }
+        context.unregisterReceiver(broadcastReceiver)
     }
 
     fun discoverPeers() {

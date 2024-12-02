@@ -57,6 +57,7 @@ class WifiP2pBroadcastReceiver(
                         override fun onSuccess() {
                             Log.d("WiFiP2P", "Group removed successfully after disconnection")
 
+
                         }
 
                         override fun onFailure(reason: Int) {

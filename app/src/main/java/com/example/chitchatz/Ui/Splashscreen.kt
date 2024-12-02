@@ -1,5 +1,4 @@
 package com.example.chitchatz.Ui
-
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
@@ -22,7 +21,6 @@ class Splashscreen : Fragment() {
     ): View? {
         _binding = FragmentSplashscreenBinding.inflate(inflater, container, false)
 
-        // Animation for text and line
         val fadeIn = AlphaAnimation(0.0f, 1.0f)
         fadeIn.duration = 4000
         binding.tvAppname.startAnimation(fadeIn)
@@ -30,18 +28,14 @@ class Splashscreen : Fragment() {
         val fadeIn2 = AlphaAnimation(0.0f, 1.0f)
         fadeIn2.duration = 4000
         binding.appline.startAnimation(fadeIn2)
-
-        // Delay navigation until the fragment is attached and view is created
         Handler(Looper.getMainLooper()).postDelayed({
-            if (isAdded) {
-                findNavController().navigate(R.id.action_splashScreenFragment_to_wiFiDirectFragment)
-            }
-        }, 5000)  // Delay of 5 seconds
+            findNavController().navigate(R.id.action_splashScreenFragment_to_wiFiDirectFragment)
+        }, 5000)
 
         return binding.root
     }
-
     private lateinit var dialogView: View
+
 
     override fun onDestroyView() {
         super.onDestroyView()
