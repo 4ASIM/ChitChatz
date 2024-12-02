@@ -2,6 +2,7 @@ package com.example.chitchatz.Ui.WifiDirectFragment.ChattingFragment
 import android.Manifest
 import android.annotation.SuppressLint
 import android.content.ContentUris
+import android.content.ContentValues
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
@@ -379,8 +380,8 @@ class ChattingFragment : Fragment(R.layout.fragment_chatting) {
                 socket?.getOutputStream()?.let { outputStream ->
                     val dataOutputStream = DataOutputStream(outputStream)
                     dataOutputStream.writeUTF("DOCUMENT")
-                    dataOutputStream.writeUTF(documentName) // Send document name
-                    dataOutputStream.writeInt(byteArray.size) // Send document size
+                    dataOutputStream.writeUTF(documentName)
+                    dataOutputStream.writeInt(byteArray.size)
                     while (offset < byteArray.size) {
                         val sizeToSend = (byteArray.size - offset).coerceAtMost(chunkSize)
                         dataOutputStream.writeInt(sizeToSend)
@@ -400,8 +401,8 @@ class ChattingFragment : Fragment(R.layout.fragment_chatting) {
                 socket?.getOutputStream()?.let { outputStream ->
                     val dataOutputStream = DataOutputStream(outputStream)
                     dataOutputStream.writeUTF("CONTACT")
-                    dataOutputStream.writeUTF(contactDetails.first)  // Contact name
-                    dataOutputStream.writeUTF(contactDetails.second) // Contact phone number
+                    dataOutputStream.writeUTF(contactDetails.first)
+                    dataOutputStream.writeUTF(contactDetails.second)
                 }
             } catch (e: IOException) {
                 e.printStackTrace()
@@ -433,8 +434,8 @@ class ChattingFragment : Fragment(R.layout.fragment_chatting) {
         val resolver = requireContext().contentResolver
         val contentValues = android.content.ContentValues().apply {
             put(MediaStore.MediaColumns.DISPLAY_NAME, fileName)
-            put(MediaStore.MediaColumns.MIME_TYPE, "application/pdf") // Adjust MIME type if needed
-            put(MediaStore.MediaColumns.RELATIVE_PATH, "Documents/PingMe")
+            put(MediaStore.MediaColumns.MIME_TYPE, "application/pdf")
+            put(MediaStore.MediaColumns.RELATIVE_PATH, "Documents/ChitChatDocument")
         }
         val uri = resolver.insert(MediaStore.Files.getContentUri("external"), contentValues)
         uri?.let {
@@ -452,7 +453,7 @@ class ChattingFragment : Fragment(R.layout.fragment_chatting) {
         val contentValues = android.content.ContentValues().apply {
             put(MediaStore.MediaColumns.DISPLAY_NAME, filename)
             put(MediaStore.MediaColumns.MIME_TYPE, "video/mp4")
-            put(MediaStore.MediaColumns.RELATIVE_PATH, "Movies/PingMeVideos")
+            put(MediaStore.MediaColumns.RELATIVE_PATH, "Movies/ChitChatz")
         }
         return resolver.insert(MediaStore.Video.Media.EXTERNAL_CONTENT_URI, contentValues)
             ?.let { uri ->
@@ -470,7 +471,7 @@ class ChattingFragment : Fragment(R.layout.fragment_chatting) {
         val contentValues = android.content.ContentValues().apply {
             put(MediaStore.MediaColumns.DISPLAY_NAME, filename)
             put(MediaStore.MediaColumns.MIME_TYPE, "image/jpeg")
-            put(MediaStore.MediaColumns.RELATIVE_PATH, "Pictures/PingMeImages")
+            put(MediaStore.MediaColumns.RELATIVE_PATH, "Pictures/ChitChatzImages")
         }
         return resolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, contentValues)
             ?.let { uri ->
@@ -516,11 +517,28 @@ class ChattingFragment : Fragment(R.layout.fragment_chatting) {
 
                             "VIDEO" -> {
                                 val videoSize = dataInputStream.readLong()
-                                val videoFile = File(requireContext().filesDir, "received_video_${System.currentTimeMillis()}.mp4")
-                                val outputStream = FileOutputStream(videoFile)
+                                if (videoSize <= 0) throw IOException("Invalid video size: $videoSize")
+
+                                val fileName = "VID_${System.currentTimeMillis()}.mp4"
+                                val resolver = requireContext().contentResolver
+                                val contentValues = ContentValues().apply {
+                                    put(MediaStore.MediaColumns.DISPLAY_NAME, fileName)
+                                    put(MediaStore.MediaColumns.MIME_TYPE, "video/mp4")
+                                    put(MediaStore.MediaColumns.RELATIVE_PATH, "Movies/ChitChatz")
+                                }
+
+                                val videoUri = resolver.insert(MediaStore.Video.Media.EXTERNAL_CONTENT_URI, contentValues)
+                                if (videoUri == null) {
+                                    throw IOException("Failed to create video file in storage")
+                                }
+
+                                val outputStream = resolver.openOutputStream(videoUri)
+                                if (outputStream == null) {
+                                    throw IOException("Failed to open output stream for video file")
+                                }
+
                                 var bytesRead: Long = 0
                                 val buffer = ByteArray(1024 * 4) // 4KB buffer
-
                                 while (bytesRead < videoSize) {
                                     val sizeToRead = (videoSize - bytesRead).coerceAtMost(buffer.size.toLong()).toInt()
                                     val read = dataInputStream.read(buffer, 0, sizeToRead)
@@ -530,11 +548,11 @@ class ChattingFragment : Fragment(R.layout.fragment_chatting) {
                                 }
 
                                 outputStream.close()
+
                                 activity?.runOnUiThread {
-                                    addMessage(null, false, videoUri = videoFile.absolutePath)
+                                    addMessage(null, false, videoUri = videoUri.toString())
                                 }
                             }
-
 
                             "DOCUMENT" -> {
                                 val documentName = dataInputStream.readUTF()
