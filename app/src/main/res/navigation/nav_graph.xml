@@ -37,9 +37,5 @@
         android:id="@+id/chattingFragment"
         android:name="com.example.chitchatz.Ui.WifiDirectFragment.ChattingFragment.ChattingFragment"
         android:label="fragment_chatting"
-        tools:layout="@layout/fragment_chatting" >
-        <action
-            android:id="@+id/action_chattingFragment_to_wiFiDirectFragment"
-            app:destination="@id/wiFiDirectFragment" />
-    </fragment>
+        tools:layout="@layout/fragment_chatting" />
 </navigation>

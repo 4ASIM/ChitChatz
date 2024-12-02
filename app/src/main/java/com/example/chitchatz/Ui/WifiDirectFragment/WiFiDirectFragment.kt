@@ -1,7 +1,10 @@
 package com.example.chitchatz.Ui.WifiDirectFragment
-
+import android.provider.Settings
 import android.Manifest
+import android.content.Context
+import android.content.Intent
 import android.content.pm.PackageManager
+import android.location.LocationManager
 import android.os.Bundle
 import android.util.Log
 import android.view.View
@@ -12,6 +15,7 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.chitchatz.R
+import com.example.chitchatz.Ui.WifiDirectFragment.ChattingFragment.PermissionsUtil.PermissionsUtil
 import com.example.chitchatz.databinding.FragmentWiFiDirectBinding
 import com.google.android.material.snackbar.Snackbar
 
@@ -61,26 +65,40 @@ class WiFiDirectFragment : Fragment(R.layout.fragment_wi_fi_direct) {
                 animationView.cancelAnimation()
             }
         }
-
         viewModel.errorMessage.observe(viewLifecycleOwner) { error ->
             animationView.visibility = View.GONE
             animationView.cancelAnimation()
         }
 
-
-        // Search WiFi button action
         binding.btnSearchwifi.setOnClickListener {
-            if (ActivityCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-                requestPermissions(
-                    arrayOf(Manifest.permission.ACCESS_FINE_LOCATION),
-                    LOCATION_PERMISSION_REQUEST_CODE
-                )
-            } else {
+            if (!isLocationEnabled()) {
+                // Prompt the user to enable location
+                Toast.makeText(requireContext(), "Please enable location services", Toast.LENGTH_SHORT).show()
+                val intent = Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS)
+                startActivity(intent)
+            } else if (PermissionsUtil.hasPermissions(requireContext())) {
                 animationView.visibility = View.VISIBLE
                 animationView.playAnimation()
                 viewModel.discoverPeers()
+            } else {
+                // Request permissions
+                PermissionsUtil.requestPermissions(this)
             }
         }
+
+        // Search WiFi button action
+//        binding.btnSearchwifi.setOnClickListener {
+//            if (ActivityCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+//                requestPermissions(
+//                    arrayOf(Manifest.permission.ACCESS_FINE_LOCATION),
+//                    LOCATION_PERMISSION_REQUEST_CODE
+//                )
+//            } else {
+//                animationView.visibility = View.VISIBLE
+//                animationView.playAnimation()
+//                viewModel.discoverPeers()
+//            }
+//        }
         viewModel.deviceList.observe(viewLifecycleOwner) { devices ->
             if (devices.isNotEmpty()) {
                 animationView.cancelAnimation()
@@ -98,9 +116,11 @@ class WiFiDirectFragment : Fragment(R.layout.fragment_wi_fi_direct) {
 
 
 
-    override fun onPause() {
-        super.onPause()
-        viewModel.unregisterReceiver(requireContext())
+
+    private fun isLocationEnabled(): Boolean {
+        val locationManager = requireContext().getSystemService(Context.LOCATION_SERVICE) as LocationManager
+        return locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER) ||
+                locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)
     }
 
     override fun onDestroyView() {
@@ -114,12 +134,30 @@ class WiFiDirectFragment : Fragment(R.layout.fragment_wi_fi_direct) {
         grantResults: IntArray
     ) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-        if (requestCode == LOCATION_PERMISSION_REQUEST_CODE) {
-            if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+
+        PermissionsUtil.handleRequestPermissionsResult(
+            requestCode, permissions, grantResults,
+            onPermissionsGranted = {
+                // Register the receiver and start discovering peers
+                viewModel.registerReceiver(requireContext())
                 viewModel.discoverPeers()
-            } else {
-                Log.e(TAG, "Permission denied")
+            },
+            onPermissionsDenied = { deniedPermissions ->
+                // Handle denied permissions
+                Snackbar.make(binding.root, "Permissions denied: ${deniedPermissions.joinToString(", ")}", Snackbar.LENGTH_LONG).show()
+                Log.e("WiFiDirectDemo", "Denied permissions: $deniedPermissions")
             }
-        }
+        )
     }
+    override fun onResume() {
+        super.onResume()
+        viewModel.registerReceiver(requireContext())
+    }
+
+    override fun onPause() {
+        super.onPause()
+        viewModel.unregisterReceiver(requireContext())
+    }
+
+
 }

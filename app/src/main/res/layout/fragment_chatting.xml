@@ -6,7 +6,7 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:padding="10dp"
-    tools:context=".Ui.ChattingFragment.ChattingFragment">
+    tools:context=".Ui.WifiDirectFragment.ChattingFragment.ChattingFragment">
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/message_list"
