@@ -284,15 +284,18 @@ class ChattingFragment : Fragment(R.layout.fragment_chatting) {
     private fun processVideoSelection(videoUri: Uri) {
         try {
             val thumbnail = getVideoThumbnail(videoUri) // Generate thumbnail
-            val videoBytes = requireContext().contentResolver.openInputStream(videoUri)?.readBytes()
-            val videoSize = videoBytes?.size?.toLong() ?: 0L  // Convert video size to Long
-            sendVideo(videoUri, videoBytes, videoSize)  // Pass Long size to sendVideo
+            val videoSize = requireContext().contentResolver.openFileDescriptor(videoUri, "r")?.statSize
+                ?: throw IOException("Unable to retrieve video size")
 
+            sendVideo(videoUri, videoSize) // Pass URI and size for streaming
+
+            // Optionally, display the thumbnail in the UI
             addMessage(null, true, videoUri = videoUri.toString(), videoThumbnail = thumbnail)
         } catch (e: IOException) {
             e.printStackTrace()
         }
     }
+
 
 
     private fun getVideoThumbnail(videoUri: Uri): Bitmap? {
@@ -335,29 +338,34 @@ class ChattingFragment : Fragment(R.layout.fragment_chatting) {
         }
     }
 
-    private fun sendVideo(videoUri: Uri, videoBytes: ByteArray?, videoSize: Long) {
+    private fun sendVideo(videoUri: Uri, videoSize: Long) {
         thread {
             try {
                 socket?.getOutputStream()?.let { outputStream ->
                     val dataOutputStream = DataOutputStream(outputStream)
-                    dataOutputStream.writeUTF("VIDEO")
-                    dataOutputStream.writeLong(videoSize) // Use writeLong instead of writeInt for video size
+                    val buffer = ByteArray(1024 * 8) // 8KB buffer
+                    var bytesRead: Int
+                    var totalBytesRead = 0L
 
-                    // Send the video in chunks
-                    var offset = 0L // Change to Long
-                    val chunkSize = 1024L // Change to Long
-                    while (offset < videoSize) {
-                        val sizeToSend = (videoSize - offset).coerceAtMost(chunkSize)
-                        dataOutputStream.writeLong(sizeToSend) // Use writeLong instead of writeInt for chunk size
-                        dataOutputStream.write(videoBytes, offset.toInt(), sizeToSend.toInt()) // Convert offset and sizeToSend back to Int for byte array
-                        offset += sizeToSend
+                    // Open the video as a stream
+                    val inputStream = requireContext().contentResolver.openInputStream(videoUri) ?: return@thread
+                    dataOutputStream.writeUTF("VIDEO")
+                    dataOutputStream.writeLong(videoSize) // Send video size
+
+                    // Stream the video in chunks
+                    while (inputStream.read(buffer).also { bytesRead = it } != -1) {
+                        dataOutputStream.write(buffer, 0, bytesRead)
+                        totalBytesRead += bytesRead
                     }
+
+                    inputStream.close()
                 }
             } catch (e: IOException) {
                 e.printStackTrace()
             }
         }
     }
+
 
 
     private fun sendDocument(documentUri: Uri, documentName: String) {
@@ -507,29 +515,18 @@ class ChattingFragment : Fragment(R.layout.fragment_chatting) {
                             }
 
                             "VIDEO" -> {
-                                val videoSize =
-                                    dataInputStream.readLong() // Change to readLong for video size
-                                if (videoSize <= 0) throw IOException("Invalid video size: $videoSize")
-
-                                val videoFile = File(
-                                    requireContext().filesDir,
-                                    "received_video_${System.currentTimeMillis()}.mp4"
-                                )
+                                val videoSize = dataInputStream.readLong()
+                                val videoFile = File(requireContext().filesDir, "received_video_${System.currentTimeMillis()}.mp4")
                                 val outputStream = FileOutputStream(videoFile)
+                                var bytesRead: Long = 0
+                                val buffer = ByteArray(1024 * 4) // 4KB buffer
 
-                                var offset = 0L // Change to Long
-                                while (offset < videoSize) {
-                                    val chunkSize =
-                                        dataInputStream.readLong() // Change to readLong for chunk size
-                                    if (chunkSize <= 0 || chunkSize > (videoSize - offset)) {
-                                        throw IOException("Invalid chunk size received: $chunkSize")
-                                    }
-
-                                    val buffer =
-                                        ByteArray(chunkSize.toInt()) // Convert Long to Int for buffer
-                                    dataInputStream.readFully(buffer, 0, chunkSize.toInt())
-                                    outputStream.write(buffer)
-                                    offset += chunkSize
+                                while (bytesRead < videoSize) {
+                                    val sizeToRead = (videoSize - bytesRead).coerceAtMost(buffer.size.toLong()).toInt()
+                                    val read = dataInputStream.read(buffer, 0, sizeToRead)
+                                    if (read == -1) break
+                                    outputStream.write(buffer, 0, read)
+                                    bytesRead += read
                                 }
 
                                 outputStream.close()
@@ -537,6 +534,7 @@ class ChattingFragment : Fragment(R.layout.fragment_chatting) {
                                     addMessage(null, false, videoUri = videoFile.absolutePath)
                                 }
                             }
+
 
                             "DOCUMENT" -> {
                                 val documentName = dataInputStream.readUTF()
