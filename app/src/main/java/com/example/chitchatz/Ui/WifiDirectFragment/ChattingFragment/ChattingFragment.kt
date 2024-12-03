@@ -519,6 +519,10 @@ class ChattingFragment : Fragment(R.layout.fragment_chatting) {
                                 val videoSize = dataInputStream.readLong()
                                 if (videoSize <= 0) throw IOException("Invalid video size: $videoSize")
 
+                                activity?.runOnUiThread {
+                                    binding.progressContainer.visibility = View.VISIBLE // Show progress UI
+                                    binding.progressText.text = "0 / $videoSize bytes received"
+                                }
                                 val fileName = "VID_${System.currentTimeMillis()}.mp4"
                                 val resolver = requireContext().contentResolver
                                 val contentValues = ContentValues().apply {
@@ -538,18 +542,31 @@ class ChattingFragment : Fragment(R.layout.fragment_chatting) {
                                 }
 
                                 var bytesRead: Long = 0
-                                val buffer = ByteArray(1024 * 4) // 4KB buffer
+                                val buffer = ByteArray(1024 * 1024) // 1 mb buffer
                                 while (bytesRead < videoSize) {
                                     val sizeToRead = (videoSize - bytesRead).coerceAtMost(buffer.size.toLong()).toInt()
                                     val read = dataInputStream.read(buffer, 0, sizeToRead)
                                     if (read == -1) break
                                     outputStream.write(buffer, 0, read)
                                     bytesRead += read
+
+                                    val progress = (bytesRead * 100 / videoSize).toInt()
+                                    val bytesReadInMB = bytesRead.toDouble() / (1024 * 1024)
+                                    val videoSizeInMB = videoSize.toDouble() / (1024 * 1024)
+
+                                    activity?.runOnUiThread {
+                                        binding.progressBar.progress = progress
+                                        binding.progressText.text = String.format(
+                                            "%.2f MB / %.2f MB received",
+                                            bytesReadInMB,
+                                            videoSizeInMB
+                                        ) }
                                 }
 
                                 outputStream.close()
 
                                 activity?.runOnUiThread {
+                                    binding.progressContainer.visibility = View.GONE
                                     addMessage(null, false, videoUri = videoUri.toString())
                                 }
                             }
