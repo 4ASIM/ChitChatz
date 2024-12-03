@@ -1,6 +1,6 @@
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/activity_chat"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -14,23 +14,22 @@
         android:layout_height="0dp"
         android:layout_weight="1"
         android:divider="@android:color/transparent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
         android:dividerHeight="10dp"
         android:scrollbars="vertical"
         app:layout_constraintBottom_toTopOf="@+id/scrollView"
-        />
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
     <ScrollView
         android:id="@+id/scrollView"
         android:layout_width="0dp"
-        android:layout_height="wrap_content"
+        android:layout_height="60dp"
         android:fillViewport="true"
-        app:layout_constraintStart_toEndOf="@+id/fabConstraint"
+        android:layout_marginBottom="12dp"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-
-        app:layout_constraintBottom_toBottomOf="@+id/fabConstraint">
+        app:layout_constraintStart_toEndOf="@+id/fabConstraint">
 
         <LinearLayout
             android:id="@+id/linearLayout"
@@ -47,15 +46,16 @@
 
             <EditText
                 android:id="@+id/text_send"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
                 android:layout_gravity="end|bottom"
+                android:layout_marginBottom="13dp"
                 android:layout_weight="1"
+                android:layout_marginTop="10dp"
                 android:background="@color/white"
-                android:hint="type_a_message"
+                android:hint="Enter Message"
                 android:inputType="textMultiLine"
                 android:maxLines="5"
-                android:layout_marginBottom="13dp"
                 android:scrollbars="vertical" />
 
             <ImageButton
@@ -64,61 +64,52 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="end|bottom"
                 android:layout_marginTop="4dp"
+                android:layout_marginBottom="16dp"
                 android:background="@drawable/send_alt_1_svgrepo_com"
-                android:layout_marginBottom="24dp"
                 android:padding="8dp" />
         </LinearLayout>
     </ScrollView>
+
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/fabConstraint"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:minHeight="32dp"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        >
+        app:layout_constraintStart_toStartOf="parent">
 
         <com.google.android.material.floatingactionbutton.FloatingActionButton
             android:id="@+id/mainFabBtn"
-            android:layout_width="45dp"
-            android:layout_height="45dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
             android:layout_marginEnd="12dp"
             android:layout_marginBottom="12dp"
-            app:backgroundTint="@color/custom"
-            android:tint="@color/custom"
+            app:elevation="0dp"
+            app:useCompatPadding="false"
+            android:foregroundGravity="center"
             android:padding="0dp"
+            android:src="@drawable/clip_svgrepo_com"
+            app:backgroundTint="@color/custom"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            android:src="@drawable/clip_svgrepo_com"
-            app:tint="@color/white" />
+            app:tint="@color/white"
+            />
+
         <com.google.android.material.floatingactionbutton.FloatingActionButton
             android:id="@+id/ContactFabBtn"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginBottom="12dp"
-            app:backgroundTint="@color/custom"
+            android:foregroundGravity="fill"
+            app:elevation="0dp"
+            app:useCompatPadding="false"
+            android:src="@drawable/image_square_svgrepo_com"
             android:tint="@color/custom"
             android:visibility="invisible"
+            app:backgroundTint="@color/custom"
             app:layout_constraintBottom_toTopOf="@id/sendFabBtn"
             app:layout_constraintEnd_toEndOf="@id/sendFabBtn"
-            android:src="@drawable/image_square_svgrepo_com"
             app:tint="@color/white" />
-
-        <TextView
-            android:id="@+id/ContactTv2222"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:background="@drawable/image_square_svgrepo_com"
-            android:elevation="8dp"
-            android:paddingHorizontal="15dp"
-            android:paddingVertical="8dp"
-            android:text="3"
-            android:textColor="@color/black"
-            android:textStyle="bold"
-            android:visibility="invisible"
-            app:layout_constraintBottom_toBottomOf="@id/galleryFabBtn"
-            app:layout_constraintEnd_toStartOf="@id/galleryFabBtn"
-            app:layout_constraintTop_toTopOf="@id/galleryFabBtn" />
 
 
         <com.google.android.material.floatingactionbutton.FloatingActionButton
@@ -126,29 +117,15 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginBottom="12dp"
-            app:backgroundTint="@color/custom"
+            android:src="@drawable/image_square_svgrepo_com"
             android:tint="@color/custom"
+            app:elevation="0dp"
+            app:useCompatPadding="false"
             android:visibility="invisible"
+            app:backgroundTint="@color/custom"
             app:layout_constraintBottom_toTopOf="@id/mainFabBtn"
             app:layout_constraintEnd_toEndOf="@id/mainFabBtn"
-            android:src="@drawable/image_square_svgrepo_com"
             app:tint="@color/white" />
-
-        <TextView
-            android:id="@+id/galleryTv2222"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:background="@drawable/image_square_svgrepo_com"
-            android:elevation="8dp"
-            android:paddingHorizontal="15dp"
-            android:paddingVertical="8dp"
-            android:text="3"
-            android:textColor="@color/black"
-            android:textStyle="bold"
-            android:visibility="invisible"
-            app:layout_constraintBottom_toBottomOf="@id/galleryFabBtn"
-            app:layout_constraintEnd_toStartOf="@id/galleryFabBtn"
-            app:layout_constraintTop_toTopOf="@id/galleryFabBtn" />
 
 
         <com.google.android.material.floatingactionbutton.FloatingActionButton
@@ -157,29 +134,15 @@
             android:layout_height="wrap_content"
             android:layout_marginBottom="12dp"
             android:backgroundTint="@color/custom"
-            app:backgroundTint="@color/custom"
+            app:elevation="0dp"
+            app:useCompatPadding="false"
+            android:src="@drawable/video_play_svgrepo_com"
             android:tint="@color/custom"
             android:visibility="invisible"
+            app:backgroundTint="@color/custom"
             app:layout_constraintBottom_toTopOf="@id/galleryFabBtn"
             app:layout_constraintEnd_toEndOf="@id/galleryFabBtn"
-            android:src="@drawable/video_play_svgrepo_com"
             app:tint="@color/white" />
-
-        <TextView
-            android:id="@+id/shareTv2222"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:background="@drawable/fab_text_bg"
-            android:elevation="8dp"
-            android:paddingHorizontal="15dp"
-            android:paddingVertical="8dp"
-            android:text="2"
-            android:textColor="@color/black"
-            android:textStyle="bold"
-            android:visibility="invisible"
-            app:layout_constraintBottom_toBottomOf="@id/shareFabBtn"
-            app:layout_constraintEnd_toStartOf="@id/shareFabBtn"
-            app:layout_constraintTop_toTopOf="@id/shareFabBtn" />
 
 
         <com.google.android.material.floatingactionbutton.FloatingActionButton
@@ -187,59 +150,45 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginBottom="12dp"
-            app:backgroundTint="@color/custom"
+            android:src="@drawable/document_svgrepo_com"
+            app:elevation="0dp"
+            app:useCompatPadding="false"
             android:tint="@color/custom"
             android:visibility="invisible"
+            app:backgroundTint="@color/custom"
             app:layout_constraintBottom_toTopOf="@id/shareFabBtn"
             app:layout_constraintEnd_toEndOf="@id/shareFabBtn"
-            android:src="@drawable/document_svgrepo_com"
             app:tint="@color/white" />
-
-        <TextView
-            android:id="@+id/sendTv222"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:background="@drawable/fab_text_bg"
-            android:elevation="8dp"
-            android:paddingHorizontal="15dp"
-            android:paddingVertical="8dp"
-            android:text="1"
-            android:textColor="@color/black"
-            android:textStyle="bold"
-            android:visibility="invisible"
-            app:layout_constraintBottom_toBottomOf="@id/sendFabBtn"
-            app:layout_constraintEnd_toStartOf="@id/sendFabBtn"
-            app:layout_constraintTop_toTopOf="@id/sendFabBtn" />
 
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
 
-        <LinearLayout
-            android:id="@+id/progressContainer"
+    <LinearLayout
+        android:id="@+id/progressContainer"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:gravity="center"
+        android:orientation="vertical"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <ProgressBar
+            android:id="@+id/progressBar"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+
+        <TextView
+            android:id="@+id/progressText"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:orientation="vertical"
-            android:gravity="center"
-            android:visibility="gone"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintBottom_toBottomOf="parent">
-
-            <ProgressBar
-                android:id="@+id/progressBar"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content" />
-
-            <TextView
-                android:id="@+id/progressText"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:text="0 / 0 bytes received"
-                android:textSize="12sp"
-                android:textColor="@android:color/black" />
-        </LinearLayout>
+            android:layout_marginTop="8dp"
+            android:text="0 / 0 bytes received"
+            android:textColor="@android:color/black"
+            android:textSize="12sp" />
+    </LinearLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>

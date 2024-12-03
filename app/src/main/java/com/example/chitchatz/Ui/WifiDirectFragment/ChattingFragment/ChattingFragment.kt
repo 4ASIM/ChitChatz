@@ -94,10 +94,6 @@ class ChattingFragment : Fragment(R.layout.fragment_chatting) {
         }
 
         // Handle Photo Picker Button Click
-        binding.mainFabBtn.setOnClickListener {
-            // Expand FAB menu when button is clicked
-            if (isExpanded) shrinkFab() else expandFab()
-        }
 
         // Handle Floating Button Actions
         setupFabActions()
@@ -130,43 +126,57 @@ class ChattingFragment : Fragment(R.layout.fragment_chatting) {
             startActivityForResult(intent, REQUEST_DOCUMENT_PICK)
         }
 
-
+        // Contact Picker FAB
         binding.ContactFabBtn.setOnClickListener {
             val intent = Intent(Intent.ACTION_PICK, ContactsContract.Contacts.CONTENT_URI)
             startActivityForResult(intent, REQUEST_CONTACT_PICK)
         }
 
-        // Main FAB (Collapse or Expand Menu)
+        // Main FAB (Toggle visibility of other buttons)
         binding.mainFabBtn.setOnClickListener {
-            if (isExpanded) shrinkFab() else expandFab()
+            if (isExpanded) {
+                // Hide all other buttons
+                binding.galleryFabBtn.visibility = View.GONE
+                binding.shareFabBtn.visibility = View.GONE
+                binding.sendFabBtn.visibility = View.GONE
+                binding.ContactFabBtn.visibility = View.GONE
+            } else {
+                // Show all other buttons
+                binding.galleryFabBtn.visibility = View.VISIBLE
+                binding.shareFabBtn.visibility = View.VISIBLE
+                binding.sendFabBtn.visibility = View.VISIBLE
+                binding.ContactFabBtn.visibility = View.VISIBLE
+            }
+            isExpanded = !isExpanded
         }
     }
 
-    private fun expandFab() {
-        binding.mainFabBtn.startAnimation(rotateClockWiseFabAnim)
-        binding.galleryFabBtn.startAnimation(fromBottomFabAnim)
-        binding.shareFabBtn.startAnimation(fromBottomFabAnim)
-        binding.sendFabBtn.startAnimation(fromBottomFabAnim)
-        binding.ContactFabBtn.startAnimation(fromBottomFabAnim)
-        binding.galleryFabBtn.visibility = View.VISIBLE
-        binding.shareFabBtn.visibility = View.VISIBLE
-        binding.sendFabBtn.visibility = View.VISIBLE
-        binding.ContactFabBtn.visibility = View.VISIBLE
-        isExpanded = true
-    }
 
-    private fun shrinkFab() {
-        binding.mainFabBtn.startAnimation(rotateAntiClockWiseFabAnim)
-        binding.galleryFabBtn.startAnimation(toBottomFabAnim)
-        binding.shareFabBtn.startAnimation(toBottomFabAnim)
-        binding.sendFabBtn.startAnimation(toBottomFabAnim)
-        binding.ContactFabBtn.startAnimation(toBottomFabAnim)
-        binding.galleryFabBtn.visibility = View.GONE
-        binding.shareFabBtn.visibility = View.GONE
-        binding.sendFabBtn.visibility = View.GONE
-        binding.ContactFabBtn.visibility = View.GONE
-        isExpanded = false
-    }
+//    private fun expandFab() {
+//        binding.mainFabBtn.startAnimation(rotateClockWiseFabAnim)
+//        binding.galleryFabBtn.startAnimation(fromBottomFabAnim)
+//        binding.shareFabBtn.startAnimation(fromBottomFabAnim)
+//        binding.sendFabBtn.startAnimation(fromBottomFabAnim)
+//        binding.ContactFabBtn.startAnimation(fromBottomFabAnim)
+//        binding.galleryFabBtn.visibility = View.VISIBLE
+//        binding.shareFabBtn.visibility = View.VISIBLE
+//        binding.sendFabBtn.visibility = View.VISIBLE
+//        binding.ContactFabBtn.visibility = View.VISIBLE
+//        isExpanded = true
+//    }
+//
+//    private fun shrinkFab() {
+//        binding.mainFabBtn.startAnimation(rotateAntiClockWiseFabAnim)
+//        binding.galleryFabBtn.startAnimation(toBottomFabAnim)
+//        binding.shareFabBtn.startAnimation(toBottomFabAnim)
+//        binding.sendFabBtn.startAnimation(toBottomFabAnim)
+//        binding.ContactFabBtn.startAnimation(toBottomFabAnim)
+//        binding.galleryFabBtn.visibility = View.GONE
+//        binding.shareFabBtn.visibility = View.GONE
+//        binding.sendFabBtn.visibility = View.GONE
+//        binding.ContactFabBtn.visibility = View.GONE
+//        isExpanded = false
+//    }
 
     @Deprecated("Deprecated in Java")
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
