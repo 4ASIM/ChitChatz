@@ -75,8 +75,6 @@ class WiFiDirectFragment : Fragment(R.layout.fragment_wi_fi_direct) {
 
         binding.btnSearchwifi.setOnClickListener {
             if (!isLocationEnabled()) {
-                // Prompt the user to enable location
-                Toast.makeText(requireContext(), "Please enable location services", Toast.LENGTH_SHORT).show()
                 val intent = Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS)
                 startActivity(intent)
             } else if (PermissionsUtil.hasPermissions(requireContext())) {
@@ -84,7 +82,6 @@ class WiFiDirectFragment : Fragment(R.layout.fragment_wi_fi_direct) {
                 animationView.playAnimation()
                 viewModel.discoverPeers()
             } else {
-                // Request permissions
                 PermissionsUtil.requestPermissions(this)
             }
         }
@@ -111,7 +108,7 @@ class WiFiDirectFragment : Fragment(R.layout.fragment_wi_fi_direct) {
         viewModel.errorMessage.observe(viewLifecycleOwner) { error ->
             animationView.cancelAnimation()
             animationView.visibility = View.GONE
-            Snackbar.make(binding.root, error, Snackbar.LENGTH_LONG).show()
+
         }
         // Register receiver
         viewModel.registerReceiver(requireContext())
@@ -141,13 +138,11 @@ class WiFiDirectFragment : Fragment(R.layout.fragment_wi_fi_direct) {
         PermissionsUtil.handleRequestPermissionsResult(
             requestCode, permissions, grantResults,
             onPermissionsGranted = {
-                // Register the receiver and start discovering peers
+
                 viewModel.registerReceiver(requireContext())
                 viewModel.discoverPeers()
             },
             onPermissionsDenied = { deniedPermissions ->
-                // Handle denied permissions
-                Snackbar.make(binding.root, "Permissions denied: ${deniedPermissions.joinToString(", ")}", Snackbar.LENGTH_LONG).show()
                 Log.e("WiFiDirectDemo", "Denied permissions: $deniedPermissions")
             }
         )

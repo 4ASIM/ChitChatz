@@ -35,7 +35,7 @@ object PermissionsUtil {
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
             requiredPermissions.addAll(
                 listOf(
-                    Manifest.permission.NEARBY_WIFI_DEVICES,
+                    Manifest.permission.NEARBY_WIFI_DEVICES,  // Add this for API 33 and above
                     Manifest.permission.READ_MEDIA_IMAGES,
                     Manifest.permission.READ_MEDIA_VIDEO
                 )
@@ -73,7 +73,7 @@ object PermissionsUtil {
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
             requiredPermissions.addAll(
                 listOf(
-                    Manifest.permission.NEARBY_WIFI_DEVICES,
+                    Manifest.permission.NEARBY_WIFI_DEVICES,  // Add this for API 33 and above
                     Manifest.permission.READ_MEDIA_IMAGES,
                     Manifest.permission.READ_MEDIA_VIDEO
                 )
