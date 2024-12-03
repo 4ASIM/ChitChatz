@@ -7,6 +7,7 @@ import android.location.LocationManager
 import android.os.Bundle
 import android.util.Log
 import android.view.View
+import android.view.animation.Animation
 import android.widget.Toast
 import androidx.core.app.ActivityCompat
 import androidx.fragment.app.Fragment
@@ -17,6 +18,7 @@ import com.airbnb.lottie.LottieAnimationView
 import com.example.chitchatz.R
 import com.example.chitchatz.Ui.WifiDirectFragment.ChattingFragment.PermissionsUtil.PermissionsUtil
 import com.example.chitchatz.databinding.FragmentWiFiDirectBinding
+import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.android.material.snackbar.Snackbar
 
 class WiFiDirectFragment : Fragment(R.layout.fragment_wi_fi_direct) {
@@ -27,6 +29,11 @@ class WiFiDirectFragment : Fragment(R.layout.fragment_wi_fi_direct) {
     private val viewModel: WiFiDirectViewModel by viewModels()
     private lateinit var deviceAdapter: DeviceAdapter
     private lateinit var connectionLottie: LottieAnimationView
+    private lateinit var fabOpen: Animation
+    private lateinit var fabClose: Animation
+    private lateinit var rotateForward: Animation
+    private lateinit var rotateBackward: Animation
+    private var isOpen = false
     companion object {
         const val LOCATION_PERMISSION_REQUEST_CODE = 1
         const val TAG = "WiFiDirectDemo"

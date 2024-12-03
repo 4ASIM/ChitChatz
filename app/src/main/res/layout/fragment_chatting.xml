@@ -134,21 +134,21 @@
             android:src="@drawable/image_square_svgrepo_com"
             app:tint="@color/white" />
 
-                        <TextView
-                            android:id="@+id/galleryTv2222"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:background="@drawable/image_square_svgrepo_com"
-                            android:elevation="8dp"
-                            android:paddingHorizontal="15dp"
-                            android:paddingVertical="8dp"
-                            android:text="3"
-                            android:textColor="@color/black"
-                            android:textStyle="bold"
-                            android:visibility="invisible"
-                            app:layout_constraintBottom_toBottomOf="@id/galleryFabBtn"
-                            app:layout_constraintEnd_toStartOf="@id/galleryFabBtn"
-                            app:layout_constraintTop_toTopOf="@id/galleryFabBtn" />
+        <TextView
+            android:id="@+id/galleryTv2222"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@drawable/image_square_svgrepo_com"
+            android:elevation="8dp"
+            android:paddingHorizontal="15dp"
+            android:paddingVertical="8dp"
+            android:text="3"
+            android:textColor="@color/black"
+            android:textStyle="bold"
+            android:visibility="invisible"
+            app:layout_constraintBottom_toBottomOf="@id/galleryFabBtn"
+            app:layout_constraintEnd_toStartOf="@id/galleryFabBtn"
+            app:layout_constraintTop_toTopOf="@id/galleryFabBtn" />
 
 
         <com.google.android.material.floatingactionbutton.FloatingActionButton
@@ -165,21 +165,21 @@
             android:src="@drawable/video_play_svgrepo_com"
             app:tint="@color/white" />
 
-                        <TextView
-                            android:id="@+id/shareTv2222"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:background="@drawable/fab_text_bg"
-                            android:elevation="8dp"
-                            android:paddingHorizontal="15dp"
-                            android:paddingVertical="8dp"
-                            android:text="2"
-                            android:textColor="@color/black"
-                            android:textStyle="bold"
-                            android:visibility="invisible"
-                            app:layout_constraintBottom_toBottomOf="@id/shareFabBtn"
-                            app:layout_constraintEnd_toStartOf="@id/shareFabBtn"
-                            app:layout_constraintTop_toTopOf="@id/shareFabBtn" />
+        <TextView
+            android:id="@+id/shareTv2222"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@drawable/fab_text_bg"
+            android:elevation="8dp"
+            android:paddingHorizontal="15dp"
+            android:paddingVertical="8dp"
+            android:text="2"
+            android:textColor="@color/black"
+            android:textStyle="bold"
+            android:visibility="invisible"
+            app:layout_constraintBottom_toBottomOf="@id/shareFabBtn"
+            app:layout_constraintEnd_toStartOf="@id/shareFabBtn"
+            app:layout_constraintTop_toTopOf="@id/shareFabBtn" />
 
 
         <com.google.android.material.floatingactionbutton.FloatingActionButton
@@ -195,21 +195,21 @@
             android:src="@drawable/document_svgrepo_com"
             app:tint="@color/white" />
 
-                        <TextView
-                            android:id="@+id/sendTv222"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:background="@drawable/fab_text_bg"
-                            android:elevation="8dp"
-                            android:paddingHorizontal="15dp"
-                            android:paddingVertical="8dp"
-                            android:text="1"
-                            android:textColor="@color/black"
-                            android:textStyle="bold"
-                            android:visibility="invisible"
-                            app:layout_constraintBottom_toBottomOf="@id/sendFabBtn"
-                            app:layout_constraintEnd_toStartOf="@id/sendFabBtn"
-                            app:layout_constraintTop_toTopOf="@id/sendFabBtn" />
+        <TextView
+            android:id="@+id/sendTv222"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@drawable/fab_text_bg"
+            android:elevation="8dp"
+            android:paddingHorizontal="15dp"
+            android:paddingVertical="8dp"
+            android:text="1"
+            android:textColor="@color/black"
+            android:textStyle="bold"
+            android:visibility="invisible"
+            app:layout_constraintBottom_toBottomOf="@id/sendFabBtn"
+            app:layout_constraintEnd_toStartOf="@id/sendFabBtn"
+            app:layout_constraintTop_toTopOf="@id/sendFabBtn" />
 
 
     </androidx.constraintlayout.widget.ConstraintLayout>

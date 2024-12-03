@@ -147,11 +147,11 @@ class ChattingFragment : Fragment(R.layout.fragment_chatting) {
         binding.galleryFabBtn.startAnimation(fromBottomFabAnim)
         binding.shareFabBtn.startAnimation(fromBottomFabAnim)
         binding.sendFabBtn.startAnimation(fromBottomFabAnim)
-       binding.ContactFabBtn.startAnimation(fromBottomFabAnim)
+        binding.ContactFabBtn.startAnimation(fromBottomFabAnim)
         binding.galleryFabBtn.visibility = View.VISIBLE
         binding.shareFabBtn.visibility = View.VISIBLE
         binding.sendFabBtn.visibility = View.VISIBLE
-       binding.ContactFabBtn.visibility = View.VISIBLE
+        binding.ContactFabBtn.visibility = View.VISIBLE
         isExpanded = true
     }
 
@@ -160,7 +160,7 @@ class ChattingFragment : Fragment(R.layout.fragment_chatting) {
         binding.galleryFabBtn.startAnimation(toBottomFabAnim)
         binding.shareFabBtn.startAnimation(toBottomFabAnim)
         binding.sendFabBtn.startAnimation(toBottomFabAnim)
-       binding.ContactFabBtn.startAnimation(toBottomFabAnim)
+        binding.ContactFabBtn.startAnimation(toBottomFabAnim)
         binding.galleryFabBtn.visibility = View.GONE
         binding.shareFabBtn.visibility = View.GONE
         binding.sendFabBtn.visibility = View.GONE
