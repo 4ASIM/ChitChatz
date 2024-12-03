@@ -103,7 +103,7 @@
             android:foregroundGravity="fill"
             app:elevation="0dp"
             app:useCompatPadding="false"
-            android:src="@drawable/image_square_svgrepo_com"
+            android:src="@drawable/contact_phonebook_support_svgrepo_com"
             android:tint="@color/custom"
             android:visibility="invisible"
             app:backgroundTint="@color/custom"

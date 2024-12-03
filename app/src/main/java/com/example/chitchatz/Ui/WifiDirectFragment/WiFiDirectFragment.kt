@@ -29,13 +29,8 @@ class WiFiDirectFragment : Fragment(R.layout.fragment_wi_fi_direct) {
     private val viewModel: WiFiDirectViewModel by viewModels()
     private lateinit var deviceAdapter: DeviceAdapter
     private lateinit var connectionLottie: LottieAnimationView
-    private lateinit var fabOpen: Animation
-    private lateinit var fabClose: Animation
-    private lateinit var rotateForward: Animation
-    private lateinit var rotateBackward: Animation
-    private var isOpen = false
+
     companion object {
-        const val LOCATION_PERMISSION_REQUEST_CODE = 1
         const val TAG = "WiFiDirectDemo"
     }
 
@@ -47,6 +42,8 @@ class WiFiDirectFragment : Fragment(R.layout.fragment_wi_fi_direct) {
 
         // Initialize ViewModel
         viewModel.initialize(requireContext())
+
+
 
         // Set up RecyclerView
         deviceAdapter = DeviceAdapter(emptyList()) { selectedDevice ->
@@ -87,25 +84,15 @@ class WiFiDirectFragment : Fragment(R.layout.fragment_wi_fi_direct) {
             } else if (PermissionsUtil.hasPermissions(requireContext())) {
                 animationView.visibility = View.VISIBLE
                 animationView.playAnimation()
+                connectionLottie.cancelAnimation()
+                connectionLottie.visibility = View.GONE
                 viewModel.discoverPeers()
             } else {
                 PermissionsUtil.requestPermissions(this)
             }
         }
 
-        // Search WiFi button action
-//        binding.btnSearchwifi.setOnClickListener {
-//            if (ActivityCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-//                requestPermissions(
-//                    arrayOf(Manifest.permission.ACCESS_FINE_LOCATION),
-//                    LOCATION_PERMISSION_REQUEST_CODE
-//                )
-//            } else {
-//                animationView.visibility = View.VISIBLE
-//                animationView.playAnimation()
-//                viewModel.discoverPeers()
-//            }
-//        }
+
         viewModel.deviceList.observe(viewLifecycleOwner) { devices ->
             if (devices.isNotEmpty()) {
                 animationView.cancelAnimation()
@@ -157,7 +144,9 @@ class WiFiDirectFragment : Fragment(R.layout.fragment_wi_fi_direct) {
     override fun onResume() {
         super.onResume()
         viewModel.registerReceiver(requireContext())
+        viewModel.requestCurrentConnectionInfo() // Fetch and update connection status
     }
+
 
     override fun onPause() {
         super.onPause()

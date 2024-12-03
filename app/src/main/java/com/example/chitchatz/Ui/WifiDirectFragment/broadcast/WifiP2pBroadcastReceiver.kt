@@ -51,7 +51,7 @@ class WifiP2pBroadcastReceiver(
                         }
                     }
                 } else {
-                    // Disconnected: Handle connection loss and remove group
+
                     Log.d("WiFiP2P", "Connection changed: disconnected")
                     manager.removeGroup(channel, object : WifiP2pManager.ActionListener {
                         override fun onSuccess() {

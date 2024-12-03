@@ -19,9 +19,13 @@ import androidx.appcompat.app.AlertDialog
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.chitchatz.R
 import com.example.chitchatz.databinding.FragmentChattingBinding
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import java.io.DataInputStream
 import java.io.DataOutputStream
 import java.io.File
@@ -102,19 +106,21 @@ class ChattingFragment : Fragment(R.layout.fragment_chatting) {
     private fun setupFabActions() {
         // Image Picker FAB
         binding.galleryFabBtn.setOnClickListener {
-            val intent = Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI).apply {
-                type = "image/*"
-                putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true)
-            }
+            val intent =
+                Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI).apply {
+                    type = "image/*"
+                    putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true)
+                }
             startActivityForResult(intent, REQUEST_IMAGE_PICK)
         }
 
         // Video Picker FAB
         binding.shareFabBtn.setOnClickListener {
-            val intent = Intent(Intent.ACTION_PICK, MediaStore.Video.Media.EXTERNAL_CONTENT_URI).apply {
-                type = "video/*"
-                putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true)
-            }
+            val intent =
+                Intent(Intent.ACTION_PICK, MediaStore.Video.Media.EXTERNAL_CONTENT_URI).apply {
+                    type = "video/*"
+                    putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true)
+                }
             startActivityForResult(intent, REQUEST_VIDEO_PICK)
         }
 
@@ -151,32 +157,6 @@ class ChattingFragment : Fragment(R.layout.fragment_chatting) {
         }
     }
 
-
-//    private fun expandFab() {
-//        binding.mainFabBtn.startAnimation(rotateClockWiseFabAnim)
-//        binding.galleryFabBtn.startAnimation(fromBottomFabAnim)
-//        binding.shareFabBtn.startAnimation(fromBottomFabAnim)
-//        binding.sendFabBtn.startAnimation(fromBottomFabAnim)
-//        binding.ContactFabBtn.startAnimation(fromBottomFabAnim)
-//        binding.galleryFabBtn.visibility = View.VISIBLE
-//        binding.shareFabBtn.visibility = View.VISIBLE
-//        binding.sendFabBtn.visibility = View.VISIBLE
-//        binding.ContactFabBtn.visibility = View.VISIBLE
-//        isExpanded = true
-//    }
-//
-//    private fun shrinkFab() {
-//        binding.mainFabBtn.startAnimation(rotateAntiClockWiseFabAnim)
-//        binding.galleryFabBtn.startAnimation(toBottomFabAnim)
-//        binding.shareFabBtn.startAnimation(toBottomFabAnim)
-//        binding.sendFabBtn.startAnimation(toBottomFabAnim)
-//        binding.ContactFabBtn.startAnimation(toBottomFabAnim)
-//        binding.galleryFabBtn.visibility = View.GONE
-//        binding.shareFabBtn.visibility = View.GONE
-//        binding.sendFabBtn.visibility = View.GONE
-//        binding.ContactFabBtn.visibility = View.GONE
-//        isExpanded = false
-//    }
 
     @Deprecated("Deprecated in Java")
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -246,7 +226,8 @@ class ChattingFragment : Fragment(R.layout.fragment_chatting) {
         cursor?.use {
             if (it.moveToFirst()) {
                 // Get contact name
-                contactName = it.getString(it.getColumnIndexOrThrow(ContactsContract.Contacts.DISPLAY_NAME))
+                contactName =
+                    it.getString(it.getColumnIndexOrThrow(ContactsContract.Contacts.DISPLAY_NAME))
 
                 // Get contact phone number
                 val contactId = it.getString(it.getColumnIndex(ContactsContract.Contacts._ID))
@@ -259,7 +240,8 @@ class ChattingFragment : Fragment(R.layout.fragment_chatting) {
                 )
                 phoneCursor?.use { pc ->
                     if (pc.moveToFirst()) {
-                        contactPhone = pc.getString(pc.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER))
+                        contactPhone =
+                            pc.getString(pc.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER))
                     }
                 }
             }
@@ -295,8 +277,9 @@ class ChattingFragment : Fragment(R.layout.fragment_chatting) {
     private fun processVideoSelection(videoUri: Uri) {
         try {
             val thumbnail = getVideoThumbnail(videoUri) // Generate thumbnail
-            val videoSize = requireContext().contentResolver.openFileDescriptor(videoUri, "r")?.statSize
-                ?: throw IOException("Unable to retrieve video size")
+            val videoSize =
+                requireContext().contentResolver.openFileDescriptor(videoUri, "r")?.statSize
+                    ?: throw IOException("Unable to retrieve video size")
 
             sendVideo(videoUri, videoSize) // Pass URI and size for streaming
 
@@ -307,6 +290,18 @@ class ChattingFragment : Fragment(R.layout.fragment_chatting) {
         }
     }
 
+    private fun sendDisconnectMessage() {
+        thread {
+            try {
+                socket?.getOutputStream()?.let { outputStream ->
+                    val dataOutputStream = DataOutputStream(outputStream)
+                    dataOutputStream.writeUTF("DISCONNECT")
+                }
+            } catch (e: IOException) {
+                e.printStackTrace()
+            }
+        }
+    }
 
 
     private fun getVideoThumbnail(videoUri: Uri): Bitmap? {
@@ -359,7 +354,8 @@ class ChattingFragment : Fragment(R.layout.fragment_chatting) {
                     var totalBytesRead = 0L
 
                     // Open the video as a stream
-                    val inputStream = requireContext().contentResolver.openInputStream(videoUri) ?: return@thread
+                    val inputStream =
+                        requireContext().contentResolver.openInputStream(videoUri) ?: return@thread
                     dataOutputStream.writeUTF("VIDEO")
                     dataOutputStream.writeLong(videoSize) // Send video size
 
@@ -376,7 +372,6 @@ class ChattingFragment : Fragment(R.layout.fragment_chatting) {
             }
         }
     }
-
 
 
     private fun sendDocument(documentUri: Uri, documentName: String) {
@@ -437,7 +432,6 @@ class ChattingFragment : Fragment(R.layout.fragment_chatting) {
             }
         }
     }
-
 
 
     private fun saveDocumentToDeviceStorage(byteArray: ByteArray, fileName: String): String {
@@ -530,7 +524,8 @@ class ChattingFragment : Fragment(R.layout.fragment_chatting) {
                                 if (videoSize <= 0) throw IOException("Invalid video size: $videoSize")
 
                                 activity?.runOnUiThread {
-                                    binding.progressContainer.visibility = View.VISIBLE // Show progress UI
+                                    binding.progressContainer.visibility =
+                                        View.VISIBLE // Show progress UI
                                     binding.progressText.text = "0 / $videoSize bytes received"
                                 }
                                 val fileName = "VID_${System.currentTimeMillis()}.mp4"
@@ -541,7 +536,10 @@ class ChattingFragment : Fragment(R.layout.fragment_chatting) {
                                     put(MediaStore.MediaColumns.RELATIVE_PATH, "Movies/ChitChatz")
                                 }
 
-                                val videoUri = resolver.insert(MediaStore.Video.Media.EXTERNAL_CONTENT_URI, contentValues)
+                                val videoUri = resolver.insert(
+                                    MediaStore.Video.Media.EXTERNAL_CONTENT_URI,
+                                    contentValues
+                                )
                                 if (videoUri == null) {
                                     throw IOException("Failed to create video file in storage")
                                 }
@@ -554,7 +552,9 @@ class ChattingFragment : Fragment(R.layout.fragment_chatting) {
                                 var bytesRead: Long = 0
                                 val buffer = ByteArray(1024 * 1024) // 1 mb buffer
                                 while (bytesRead < videoSize) {
-                                    val sizeToRead = (videoSize - bytesRead).coerceAtMost(buffer.size.toLong()).toInt()
+                                    val sizeToRead =
+                                        (videoSize - bytesRead).coerceAtMost(buffer.size.toLong())
+                                            .toInt()
                                     val read = dataInputStream.read(buffer, 0, sizeToRead)
                                     if (read == -1) break
                                     outputStream.write(buffer, 0, read)
@@ -570,7 +570,8 @@ class ChattingFragment : Fragment(R.layout.fragment_chatting) {
                                             "%.2f MB / %.2f MB received",
                                             bytesReadInMB,
                                             videoSizeInMB
-                                        ) }
+                                        )
+                                    }
                                 }
 
                                 outputStream.close()
@@ -616,11 +617,29 @@ class ChattingFragment : Fragment(R.layout.fragment_chatting) {
                                     )
                                 }
                             }
+
+                            "DISCONNECT" -> {
+                                activity?.runOnUiThread {
+                                    if (isAdded) {
+                                        Toast.makeText(
+                                            context,
+                                            "The other device disconnected.",
+                                            Toast.LENGTH_SHORT
+                                        ).show()
+                                        findNavController().navigateUp()  // This can safely be called now
+                                    }
+                                }
+                            }
                         }
                     }
                 }
             } catch (e: IOException) {
-                e.printStackTrace()
+                activity?.runOnUiThread {
+                    if (isAdded) {
+                        findNavController().navigateUp()
+                    }
+                }
+
             }
         }
     }
@@ -655,7 +674,6 @@ class ChattingFragment : Fragment(R.layout.fragment_chatting) {
         adapter.notifyItemInserted(messages.size - 1)
         binding.messageList.scrollToPosition(messages.size - 1)
     }
-
 
 
     private fun setupServer() {
@@ -703,15 +721,27 @@ class ChattingFragment : Fragment(R.layout.fragment_chatting) {
     }
 
     override fun onDestroyView() {
-        super.onDestroyView()
-        try {
-            socket?.close()
-            serverSocket?.close()
-        } catch (e: IOException) {
-            e.printStackTrace()
+
+
+        // Launch a coroutine in the IO thread to perform network operations in the background
+        GlobalScope.launch(Dispatchers.IO) {
+            try {
+                // Send disconnect message to the other device
+                socket?.getOutputStream()?.let { outputStream ->
+                    val dataOutputStream = DataOutputStream(outputStream)
+                    dataOutputStream.writeUTF("DISCONNECT")
+                }
+
+                // Close the socket
+                socket?.close()
+
+                // Close the server socket
+                serverSocket?.close()
+
+            } catch (e: IOException) {
+                e.printStackTrace()
+            }
         }
-        _binding = null
-        Thread.currentThread().interrupt()
-        _binding = null
+        super.onDestroyView()
     }
 }

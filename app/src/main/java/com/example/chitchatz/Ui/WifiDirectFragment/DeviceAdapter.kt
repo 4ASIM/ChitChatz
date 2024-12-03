@@ -6,6 +6,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
 import android.widget.TextView
+import androidx.appcompat.app.AlertDialog
 import androidx.recyclerview.widget.RecyclerView
 import com.example.chitchatz.R
 import com.example.chitchatz.Ui.WifiDirectFragment.broadcast.WifiP2pUtils
@@ -28,10 +29,20 @@ class DeviceAdapter(
         holder.bind(device)
 //        holder.itemView.setOnClickListener { onDeviceClick(device) }
         holder.connectButton.setOnClickListener {
-            onDeviceClick(device)  // Trigger connection logic when the button is clicked
+            showConfirmationDialog(holder.itemView, device)
         }
     }
-
+    private fun showConfirmationDialog(view: View, device: WifiP2pDevice) {
+        AlertDialog.Builder(view.context)
+            .setTitle("Connect to Device")
+            .setMessage("Do you want to connect to ${device.deviceName}?")
+            .setPositiveButton("Yes") { _, _ ->
+                onDeviceClick(device) // Proceed with connection logic
+            }
+            .setNegativeButton("No", null) // Dismiss the dialog
+            .create()
+            .show()
+    }
     override fun getItemCount(): Int = wifiP2pDeviceList.size
 
     fun updateDevices(newDeviceList: List<WifiP2pDevice>) {

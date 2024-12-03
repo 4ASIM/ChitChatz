@@ -78,6 +78,11 @@ class WiFiDirectViewModel : ViewModel() {
             }
         })
     }
+
+    fun requestCurrentConnectionInfo() {
+        wifiP2pManager.requestConnectionInfo(channel, connectionInfoListener)
+    }
+
     fun disconnect() {
         wifiP2pManager.removeGroup(channel, object : WifiP2pManager.ActionListener {
             override fun onSuccess() {
@@ -91,6 +96,22 @@ class WiFiDirectViewModel : ViewModel() {
     }
 
     fun connectToDevice(device: WifiP2pDevice) {
+        // Cancel any ongoing connection attempts
+        wifiP2pManager.cancelConnect(channel, object : WifiP2pManager.ActionListener {
+            override fun onSuccess() {
+                // Proceed with the new connection after canceling
+                initiateConnection(device)
+            }
+
+            override fun onFailure(reason: Int) {
+                // Even if cancellation fails, try to initiate a new connection
+                _errorMessage.postValue("Failed to cancel previous connection: $reason")
+                initiateConnection(device)
+            }
+        })
+    }
+
+    private fun initiateConnection(device: WifiP2pDevice) {
         val config = WifiP2pConfig().apply {
             deviceAddress = device.deviceAddress
         }
@@ -102,7 +123,7 @@ class WiFiDirectViewModel : ViewModel() {
             }
 
             override fun onFailure(reason: Int) {
-                _errorMessage.postValue("Connection failed: $reason")
+                _errorMessage.postValue("Connection to ${device.deviceName} failed: $reason")
             }
         })
     }
