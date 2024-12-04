@@ -50,20 +50,8 @@ class WifiP2pBroadcastReceiver(
                             navController?.navigate(R.id.action_wiFiDirectFragment_to_chattingFragment, bundle)
                         }
                     }
-                } else {
-
-                    Log.d("WiFiP2P", "Connection changed: disconnected")
-                    manager.removeGroup(channel, object : WifiP2pManager.ActionListener {
-                        override fun onSuccess() {
-                            Log.d("WiFiP2P", "Group removed successfully after disconnection")
-
-                        }
-
-                        override fun onFailure(reason: Int) {
-                            Log.e("WiFiP2P", "Failed to remove group: $reason")
-                        }
-                    })
                 }
+
             }
             WifiP2pManager.WIFI_P2P_THIS_DEVICE_CHANGED_ACTION -> {
                 Log.d("WiFiP2P", "Device state changed")
