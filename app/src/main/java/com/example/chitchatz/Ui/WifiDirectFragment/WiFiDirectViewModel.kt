@@ -5,6 +5,8 @@ import android.content.IntentFilter
 import android.net.wifi.p2p.WifiP2pConfig
 import android.net.wifi.p2p.WifiP2pDevice
 import android.net.wifi.p2p.WifiP2pManager
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -54,11 +56,16 @@ class WiFiDirectViewModel : ViewModel() {
                 addAction(WifiP2pManager.WIFI_P2P_CONNECTION_CHANGED_ACTION)
                 addAction(WifiP2pManager.WIFI_P2P_THIS_DEVICE_CHANGED_ACTION)
             }
-            context.registerReceiver(broadcastReceiver, intentFilter)
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+                context.registerReceiver(broadcastReceiver, intentFilter, Context.RECEIVER_NOT_EXPORTED)
+            } else {
+                context.registerReceiver(broadcastReceiver, intentFilter)
+            }
             isReceiverRegistered = true
             disconnect()
         }
     }
+
 
     fun unregisterReceiver(context: Context) {
         if (isReceiverRegistered) {
