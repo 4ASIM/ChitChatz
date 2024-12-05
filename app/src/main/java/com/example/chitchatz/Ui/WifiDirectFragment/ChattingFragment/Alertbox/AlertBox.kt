@@ -16,7 +16,7 @@ class AlertBox(context: Context, attrs: AttributeSet?) : View(context, attrs) {
     private val rect: RectF = RectF()
     private val displayMetrics: DisplayMetrics = Resources.getSystem().displayMetrics
     private val drawPaint: Paint = Paint().apply {
-        color = Color.RED
+        color = Color.WHITE
         isAntiAlias = true
     }
 
@@ -34,7 +34,7 @@ class AlertBox(context: Context, attrs: AttributeSet?) : View(context, attrs) {
         return Path().apply {
             fillType = Path.FillType.WINDING
             addRoundRect(rect, 16f, 16f, Path.Direction.CW)
-            addCircle(width / 2f, 0f, dp2px(64).toFloat(), Path.Direction.CCW)
+            addCircle(width / 2f, 0f, dp2px(50).toFloat(), Path.Direction.CCW)
         }
     }
 }

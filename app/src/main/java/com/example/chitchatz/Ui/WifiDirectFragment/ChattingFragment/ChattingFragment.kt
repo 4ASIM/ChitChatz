@@ -1,7 +1,6 @@
 package com.example.chitchatz.Ui.WifiDirectFragment.ChattingFragment
 import android.Manifest
 import android.annotation.SuppressLint
-import android.app.Activity
 import android.content.BroadcastReceiver
 import android.content.ContentUris
 import android.content.ContentValues
@@ -19,23 +18,18 @@ import android.os.Looper
 import android.provider.ContactsContract
 import android.provider.MediaStore
 import android.view.View
-import android.view.animation.Animation
-import android.view.animation.AnimationUtils
-import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
-import androidx.appcompat.app.AlertDialog
+import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.FragmentActivity
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.chitchatz.R
+import com.example.chitchatz.Ui.WifiDirectFragment.ChattingFragment.Alertbox.CustomAlertDialogFragment
 import com.example.chitchatz.databinding.FragmentChattingBinding
 import java.io.DataInputStream
 import java.io.DataOutputStream
-import java.io.File
-import java.io.FileOutputStream
 import java.io.IOException
 import java.net.ServerSocket
 import java.net.Socket
@@ -77,29 +71,16 @@ class ChattingFragment : Fragment(R.layout.fragment_chatting) {
                 if (action == WifiP2pManager.WIFI_P2P_CONNECTION_CHANGED_ACTION) {
                     val networkInfo = intent.getParcelableExtra<NetworkInfo>(WifiP2pManager.EXTRA_NETWORK_INFO)
                     if (networkInfo != null && !networkInfo.isConnected) {
-                        // Navigate back to DiscoverFragment
-                        showDisconnectDialog(context)
+                        val fragmentManager = (context as AppCompatActivity).supportFragmentManager
+                        CustomAlertDialogFragment {
+                            // Navigate on confirm
+                            (context as AppCompatActivity).runOnUiThread {
+                                findNavController().navigate(R.id.action_chattingFragment_to_wiFiDirectFragment)
+                            }
+                        }.show(fragmentManager, "CustomAlertDialog")
                     }
                 }
             }
-        }
-    }
-    private fun showDisconnectDialog(context: Context) {
-        if (context is Activity) {
-            // Show an alert dialog to confirm
-            AlertDialog.Builder(context)
-                .setTitle("Connection Lost")
-                .setMessage("The Wi-Fi Direct connection was lost. Do you want to go back?")
-                .setPositiveButton("Yes") { _, _ ->
-                    // Navigate back to WifiDirectFragment
-                    activity?.runOnUiThread {
-                        findNavController().navigate(R.id.action_chattingFragment_to_wiFiDirectFragment)
-                    }
-                }
-                .setNegativeButton("No") { dialog, _ ->
-                    dialog.dismiss()
-                }
-                .show()
         }
     }
 

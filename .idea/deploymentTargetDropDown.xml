@@ -4,6 +4,18 @@
     <value>
       <entry key="app">
         <State>
+          <targetSelectedWithDropDown>
+            <Target>
+              <type value="QUICK_BOOT_TARGET" />
+              <deviceKey>
+                <Key>
+                  <type value="VIRTUAL_DEVICE_PATH" />
+                  <value value="C:\Users\PMLS\.android\avd\Copy_of_Pixel_7_API_27.avd" />
+                </Key>
+              </deviceKey>
+            </Target>
+          </targetSelectedWithDropDown>
+          <timeTargetWasSelectedWithDropDown value="2024-12-04T13:00:39.055710200Z" />
           <multipleDevicesSelectedInDropDown value="true" />
           <runningDeviceTargetsSelectedWithDialog>
             <Target>
@@ -12,15 +24,6 @@
                 <Key>
                   <type value="SERIAL_NUMBER" />
                   <value value="192.168.18.74:5555" />
-                </Key>
-              </deviceKey>
-            </Target>
-            <Target>
-              <type value="RUNNING_DEVICE_TARGET" />
-              <deviceKey>
-                <Key>
-                  <type value="SERIAL_NUMBER" />
-                  <value value="08066332C8105875" />
                 </Key>
               </deviceKey>
             </Target>

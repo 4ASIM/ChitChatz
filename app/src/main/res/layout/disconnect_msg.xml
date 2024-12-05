@@ -2,26 +2,27 @@
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:background="@android:color/transparent">
 
     <FrameLayout
         android:id="@+id/transp_background"
         android:layout_width="match_parent"
-        android:layout_height="320dp"
+        android:layout_height="240dp"
         android:background="@android:color/transparent"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintTop_toTopOf="parent">
 
         <com.example.chitchatz.Ui.WifiDirectFragment.ChattingFragment.Alertbox.AlertBox
             android:layout_width="match_parent"
-            android:layout_height="260dp"
+            android:layout_height="195dp"
             android:layout_gravity="bottom" />
 
 
         <FrameLayout
             android:id="@+id/alert_dialog_circle"
-            android:layout_width="120dp"
-            android:layout_height="120dp"
+            android:layout_width="90dp"
+            android:layout_height="90dp"
             android:layout_gravity="center_horizontal"
             android:background="@drawable/alert_dialog_circle_primary">
 
@@ -46,10 +47,10 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
-                android:layout_marginTop="128dp"
-                android:text="Important Title"
+                android:layout_marginTop="110dp"
+                android:text="DISCONNECTED"
                 android:textColor="@android:color/black"
-                android:textSize="24dp"
+                android:textSize="20dp"
                 android:textStyle="bold" />
 
             <TextView
@@ -58,10 +59,10 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
                 android:padding="8dp"
-                android:text="Example Text"
+                android:text="Connection lost from the other device. Please check the connection"
                 android:textAlignment="center"
                 android:textColor="@android:color/black"
-                android:textSize="18dp" />
+                android:textSize="13dp" />
 
         </LinearLayout>
 
@@ -70,19 +71,8 @@
             android:layout_height="wrap_content"
             android:layout_gravity="bottom"
             android:gravity="center">
-
             <TextView
-                android:id="@+id/alert_dialog_alternative_option"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_margin="12dp"
-                android:layout_weight="1"
-                android:text="Option 1"
-                android:textColor="@color/custom"
-                android:textSize="18dp" />
-
-            <TextView
-                android:id="@+id/alert_dialog_main_option"
+                android:id="@+id/ab_ok"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_margin="12dp"
@@ -92,7 +82,7 @@
                 android:paddingTop="4dp"
                 android:paddingEnd="16dp"
                 android:paddingBottom="4dp"
-                android:text="Option 2"
+                android:text="OK"
                 android:textAlignment="center"
                 android:textAllCaps="false"
                 android:textColor="@android:color/white"
