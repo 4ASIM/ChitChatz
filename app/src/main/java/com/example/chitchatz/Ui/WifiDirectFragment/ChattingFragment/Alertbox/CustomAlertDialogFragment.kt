@@ -35,6 +35,4 @@ class CustomAlertDialogFragment(function: () -> Unit) : DialogFragment() {
         super.onStart()
         dialog?.window?.setBackgroundDrawableResource(android.R.color.transparent)
     }
-
-
 }

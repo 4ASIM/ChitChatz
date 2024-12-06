@@ -33,16 +33,39 @@ class DeviceAdapter(
         }
     }
     private fun showConfirmationDialog(view: View, device: WifiP2pDevice) {
-        AlertDialog.Builder(view.context)
-            .setTitle("Connect to Device")
-            .setMessage("Do you want to connect to ${device.deviceName}?")
-            .setPositiveButton("Yes") { _, _ ->
-                onDeviceClick(device) // Proceed with connection logic
-            }
-            .setNegativeButton("No", null) // Dismiss the dialog
+        // Inflate the custom layout
+        val customView = LayoutInflater.from(view.context).inflate(R.layout.confirmation_msg, null)
+
+        // Initialize the views from your custom layout
+        val alertDialogTitle = customView.findViewById<TextView>(R.id.alert_dialog_title)
+        val alertDialogText = customView.findViewById<TextView>(R.id.alert_dialog_text)
+        val btnYes = customView.findViewById<TextView>(R.id.ab_Yes)
+        val btnNo = customView.findViewById<TextView>(R.id.ab_no)
+
+        // Set the dialog content
+        alertDialogTitle.text = "Connect to Device"
+        alertDialogText.text = "Do you want to connect to ${device.deviceName}?"
+
+        // Create the AlertDialog using a custom view
+        val dialog = AlertDialog.Builder(view.context)
+            .setView(customView)
+            .setCancelable(false) // Prevent dismissing by clicking outside the dialog
             .create()
-            .show()
+
+        // Handle button clicks
+        btnYes.setOnClickListener {
+            onDeviceClick(device) // Proceed with connection logic
+            dialog.dismiss()
+        }
+        btnNo.setOnClickListener {
+            dialog.dismiss() // Dismiss the dialog
+        }
+        dialog?.window?.setBackgroundDrawableResource(android.R.color.transparent)
+        // Show the dialog
+        dialog.show()
     }
+
+
     override fun getItemCount(): Int = wifiP2pDeviceList.size
 
     fun updateDevices(newDeviceList: List<WifiP2pDevice>) {
