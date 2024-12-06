@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@android:color/transparent">
+
+    <FrameLayout
+        android:id="@+id/transpbackground"
+        android:layout_width="match_parent"
+        android:layout_height="240dp"
+        android:background="@android:color/transparent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+
+        <com.example.chitchatz.Ui.WifiDirectFragment.ChattingFragment.Alertbox.AlertBox
+            android:layout_width="match_parent"
+            android:layout_height="195dp"
+            android:layout_gravity="bottom" />
+
+        <FrameLayout
+            android:id="@+id/line"
+            android:layout_width="90dp"
+            android:layout_height="90dp"
+            android:layout_gravity="center_horizontal"
+           >
+
+
+            <ImageView
+                android:id="@+id/line2"
+                android:layout_width="84dp"
+                android:layout_height="84dp"
+                android:layout_gravity="center"
+                android:elevation="4dp"
+                android:padding="20dp"
+                android:scaleType="fitCenter"
+                android:src="@drawable/time_delete_svgrepo_com" />
+        </FrameLayout>
+
+        <FrameLayout
+            android:id="@+id/right"
+            android:layout_width="90dp"
+            android:layout_height="90dp"
+            android:layout_gravity="right"
+            android:layout_marginEnd="30dp"
+            >
+
+
+            <ImageView
+                android:id="@+id/right_icon"
+                android:layout_width="84dp"
+                android:layout_height="84dp"
+                android:layout_gravity="center"
+                android:elevation="4dp"
+                android:padding="10dp"
+                android:scaleType="fitCenter"
+                android:src="@drawable/smartphone_sending_data_svgrep" />
+        </FrameLayout>
+
+        <FrameLayout
+            android:id="@+id/left"
+            android:layout_width="90dp"
+            android:layout_height="90dp"
+            android:layout_gravity="left"
+            android:layout_marginStart="30dp"
+            >
+
+
+            <ImageView
+                android:id="@+id/startside"
+                android:layout_width="84dp"
+                android:layout_height="84dp"
+                android:layout_gravity="center"
+                android:elevation="4dp"
+                android:padding="10dp"
+                android:scaleType="fitCenter"
+                android:src="@drawable/smartphone_sending_data_svgrepo_com" />
+        </FrameLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/alert_dialog_title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_marginTop="110dp"
+                android:text="CONNECTION TIMEOUT"
+                android:textColor="@android:color/black"
+                android:textSize="20dp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/alert_dialog_text"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:padding="8dp"
+                android:text="PLEASE TRY AGAIN LATER"
+                android:textAlignment="center"
+                android:textColor="@android:color/black"
+                android:textSize="13dp" />
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom"
+            android:gravity="center">
+
+            <TextView
+                android:id="@+id/ab_ok"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_margin="12dp"
+                android:background="@drawable/background_rounded_button_primary"
+                android:minWidth="66dp"
+                android:paddingStart="16dp"
+                android:paddingTop="4dp"
+                android:paddingEnd="16dp"
+                android:paddingBottom="4dp"
+                android:text="OK"
+                android:textAlignment="center"
+                android:textAllCaps="false"
+                android:textColor="@android:color/white"
+                android:textSize="18dp"
+                android:textStyle="bold" />
+
+        </LinearLayout>
+
+    </FrameLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>
