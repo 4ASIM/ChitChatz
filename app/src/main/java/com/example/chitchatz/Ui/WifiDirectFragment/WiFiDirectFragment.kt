@@ -12,7 +12,6 @@ import android.widget.Toast
 import androidx.core.app.ActivityCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.airbnb.lottie.LottieAnimationView
@@ -31,8 +30,6 @@ class WiFiDirectFragment : Fragment(R.layout.fragment_wi_fi_direct) {
     private lateinit var deviceAdapter: DeviceAdapter
     private lateinit var connectionLottie: LottieAnimationView
 
-
-
     companion object {
         const val TAG = "WiFiDirectDemo"
     }
@@ -45,14 +42,6 @@ class WiFiDirectFragment : Fragment(R.layout.fragment_wi_fi_direct) {
 
         // Initialize ViewModel
         viewModel.initialize(requireContext())
-        viewModel.connectionTimeout.observe(viewLifecycleOwner) { timeout ->
-            if (timeout) {
-                // Stop the Lottie animation
-                connectionLottie.cancelAnimation()
-                connectionLottie.visibility = View.GONE
-                Toast.makeText(requireContext(), "Connection attempt timed out.", Toast.LENGTH_SHORT).show()
-            }
-        }
 
 
 
@@ -61,8 +50,7 @@ class WiFiDirectFragment : Fragment(R.layout.fragment_wi_fi_direct) {
             Log.d(TAG, "Selected device: ${selectedDevice.deviceName} (${selectedDevice.deviceAddress})")
             connectionLottie.visibility = View.VISIBLE
             connectionLottie.playAnimation() // Play Lottie animation
-            viewModel.connectToDevice(selectedDevice, requireContext())
-
+            viewModel.connectToDevice(selectedDevice)
         }
 
         // Add this line to fix RecyclerView layout issue
@@ -159,10 +147,11 @@ class WiFiDirectFragment : Fragment(R.layout.fragment_wi_fi_direct) {
         viewModel.requestCurrentConnectionInfo() // Fetch and update connection status
     }
 
+
     override fun onPause() {
         super.onPause()
-        connectionLottie.cancelAnimation()
         viewModel.unregisterReceiver(requireContext())
     }
+
 
 }

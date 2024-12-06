@@ -14,7 +14,7 @@
         app:layout_constraintTop_toTopOf="parent">
 
 
-        <com.example.chitchatz.Ui.WifiDirectFragment.ChattingFragment.Alertbox.AlertBox
+        <com.example.chitchatz.Ui.WifiDirectFragment.ChattingFragment.Alertbox.AlertBoxsecond
             android:layout_width="match_parent"
             android:layout_height="195dp"
             android:layout_gravity="bottom" />
