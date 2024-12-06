@@ -16,7 +16,7 @@
 
         <com.example.chitchatz.Ui.WifiDirectFragment.ChattingFragment.Alertbox.AlertBoxsecond
             android:layout_width="match_parent"
-            android:layout_height="195dp"
+            android:layout_height="250dp"
             android:layout_gravity="bottom" />
 
         <FrameLayout
@@ -53,7 +53,7 @@
                 android:layout_height="84dp"
                 android:layout_gravity="center"
                 android:elevation="4dp"
-                android:padding="10dp"
+                android:padding="12dp"
                 android:scaleType="fitCenter"
                 android:src="@drawable/smartphone_sending_data_svgrep" />
         </FrameLayout>
