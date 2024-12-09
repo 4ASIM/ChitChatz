@@ -624,11 +624,6 @@ class ChattingFragment : Fragment(R.layout.fragment_chatting) {
                                 sendAcknowledge()
                                 activity?.runOnUiThread {
                                     if (isAdded) {
-                                        Toast.makeText(
-                                            context,
-                                            "The other device disconnected.",
-                                            Toast.LENGTH_SHORT
-                                        ).show()
                                         socket?.close()
                                         serverSocket?.close()
 

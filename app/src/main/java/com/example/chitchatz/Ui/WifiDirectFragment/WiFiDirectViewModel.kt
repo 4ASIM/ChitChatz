@@ -175,22 +175,22 @@ class WiFiDirectViewModel : ViewModel() {
 
     private fun showConnectionTimeoutDialog(device: WifiP2pDevice, context: Context) {
         // Prevent showing the dialog if it's already showing
-        if (isDialogShowing) return
-
-        val dialog = AlertDialog.Builder(context).create()
-        val customView = View.inflate(context, R.layout.timeout_dialogbox, null)
-        val okButton = customView.findViewById<TextView>(R.id.ab_ok)
-        okButton.setOnClickListener {
-            dialog.dismiss()
-            isDialogShowing = false // Reset the dialog flag
-        }
-
-        dialog.setView(customView)
-        dialog.setCancelable(false)
-        dialog?.window?.setBackgroundDrawableResource(android.R.color.transparent)
-        dialog.show()
-
-        isDialogShowing = true // Set the flag that the dialog is showing
+//        if (isDialogShowing) return
+//
+//        val dialog = AlertDialog.Builder(context).create()
+//        val customView = View.inflate(context, R.layout.timeout_dialogbox, null)
+//        val okButton = customView.findViewById<TextView>(R.id.ab_ok)
+//        okButton.setOnClickListener {
+//            dialog.dismiss()
+//            isDialogShowing = false // Reset the dialog flag
+//        }
+//
+//        dialog.setView(customView)
+//        dialog.setCancelable(false)
+//        dialog?.window?.setBackgroundDrawableResource(android.R.color.transparent)
+//        dialog.show()
+//
+//        isDialogShowing = true // Set the flag that the dialog is showing
     }
     private fun dismissConnectionTimeoutDialog() {
         // This method will dismiss the dialog if it is currently showing
