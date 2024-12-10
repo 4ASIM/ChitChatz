@@ -15,6 +15,7 @@ import android.view.View
 import android.view.animation.Animation
 import android.view.animation.AnimationUtils
 import android.widget.Toast
+import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AlertDialog
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
@@ -62,6 +63,15 @@ class ChattingFragment : Fragment(R.layout.fragment_chatting) {
         super.onViewCreated(view, savedInstanceState)
         _binding = FragmentChattingBinding.bind(view)
 
+        requireActivity().onBackPressedDispatcher.addCallback(
+            viewLifecycleOwner,
+            object : OnBackPressedCallback(true) {
+                override fun handleOnBackPressed() {
+                    showExitConfirmationDialog()
+                }
+            }
+        )
+
         binding.messageList.layoutManager = LinearLayoutManager(requireContext())
         adapter = MessageAdapter(messages, childFragmentManager)
         binding.messageList.adapter = adapter
@@ -77,6 +87,7 @@ class ChattingFragment : Fragment(R.layout.fragment_chatting) {
         } else {
             setupClient(groupOwnerAddress ?: "")
         }
+
 
         binding.btnSend.setOnClickListener {
             val message = binding.textSend.text.toString()
@@ -495,6 +506,18 @@ class ChattingFragment : Fragment(R.layout.fragment_chatting) {
                 }
                 uri.toString()
             }
+    }
+
+    private fun showExitConfirmationDialog() {
+        AlertDialog.Builder(requireContext())
+            .setTitle("Exit Chat")
+            .setMessage("Are you sure you want to exit the chat?")
+            .setPositiveButton("Yes") { _, _ ->
+                // Navigate back or pop the back stack
+                findNavController().popBackStack()
+            }
+            .setNegativeButton("No", null) // Dismiss the dialog
+            .show()
     }
 
 

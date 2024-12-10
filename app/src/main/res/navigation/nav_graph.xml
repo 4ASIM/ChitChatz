@@ -11,7 +11,9 @@
         android:label="SplashScreen">
         <action
             android:id="@+id/action_splashScreenFragment_to_wiFiDirectFragment"
-            app:destination="@id/wiFiDirectFragment" />
+            app:destination="@id/wiFiDirectFragment"
+            app:popUpTo="@+id/nav_graph"
+            app:popUpToInclusive="true"/>
     </fragment>
 
     <fragment

@@ -9,6 +9,8 @@ import android.util.Log
 import android.view.View
 import android.view.animation.Animation
 import android.widget.Toast
+import androidx.activity.addCallback
+import androidx.appcompat.app.AlertDialog
 import androidx.core.app.ActivityCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
@@ -40,6 +42,11 @@ class WiFiDirectFragment : Fragment(R.layout.fragment_wi_fi_direct) {
     override fun onViewCreated(view: android.view.View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         _binding = FragmentWiFiDirectBinding.bind(view)
+
+        requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner) {
+            showExitConfirmationDialog()
+        }
+
         val animationView = binding.animationView
         connectionLottie = binding.connectionLottie
 
@@ -119,7 +126,18 @@ class WiFiDirectFragment : Fragment(R.layout.fragment_wi_fi_direct) {
         viewModel.registerReceiver(requireContext())
     }
 
-
+    private fun showExitConfirmationDialog() {
+        AlertDialog.Builder(requireContext())
+            .setTitle("Exit App")
+            .setMessage("Are you sure you want to exit?")
+            .setPositiveButton("Yes") { _, _ ->
+                requireActivity().finish() // Close the app or activity
+            }
+            .setNegativeButton("No") { dialog, _ ->
+                dialog.dismiss() // Close the dialog
+            }
+            .show()
+    }
 
 
     private fun isLocationEnabled(): Boolean {
