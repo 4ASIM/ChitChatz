@@ -5,6 +5,7 @@ import android.content.Context
 import android.content.pm.PackageManager
 import androidx.core.app.ActivityCompat
 import androidx.fragment.app.Fragment
+import com.example.chitchatz.Ui.WifiDirectFragment.WiFiDirectFragment
 
 object PermissionsUtil {
 
@@ -44,7 +45,10 @@ object PermissionsUtil {
 
         // Check if all required permissions are granted
         return requiredPermissions.all { permission ->
-            ActivityCompat.checkSelfPermission(context, permission) == PackageManager.PERMISSION_GRANTED
+            ActivityCompat.checkSelfPermission(
+                context,
+                permission
+            ) == PackageManager.PERMISSION_GRANTED
         }
     }
 
@@ -81,13 +85,17 @@ object PermissionsUtil {
         }
 
         // Request permissions dynamically
-        fragment.requestPermissions(requiredPermissions.toTypedArray(), LOCATION_PERMISSION_REQUEST_CODE)
+        fragment.requestPermissions(
+            requiredPermissions.toTypedArray(),
+            LOCATION_PERMISSION_REQUEST_CODE
+        )
     }
 
     fun handleRequestPermissionsResult(
         requestCode: Int,
         permissions: Array<out String>,
         grantResults: IntArray,
+        fragment: Fragment,
         onPermissionsGranted: () -> Unit,
         onPermissionsDenied: (List<String>) -> Unit
     ) {
@@ -96,11 +104,23 @@ object PermissionsUtil {
                 .filter { it.second != PackageManager.PERMISSION_GRANTED }
                 .map { it.first }
 
+            val permanentlyDeniedPermissions = deniedPermissions.filter { permission ->
+                !ActivityCompat.shouldShowRequestPermissionRationale(
+                    fragment.requireActivity(),
+                    permission
+                )
+            }
+
             if (deniedPermissions.isEmpty()) {
                 onPermissionsGranted()
+            } else if (permanentlyDeniedPermissions.isNotEmpty()) {
+                (fragment as WiFiDirectFragment).showAppSettingsPrompt(
+                    "Some critical permissions are permanently denied. Please enable them in Settings to proceed."
+                )
             } else {
                 onPermissionsDenied(deniedPermissions)
             }
         }
     }
 }
+

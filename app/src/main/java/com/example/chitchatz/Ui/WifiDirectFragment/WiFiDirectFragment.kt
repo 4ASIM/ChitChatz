@@ -159,17 +159,51 @@ class WiFiDirectFragment : Fragment(R.layout.fragment_wi_fi_direct) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
 
         PermissionsUtil.handleRequestPermissionsResult(
-            requestCode, permissions, grantResults,
+            requestCode, permissions, grantResults,this,
             onPermissionsGranted = {
 
                 viewModel.registerReceiver(requireContext())
                 viewModel.discoverPeers()
             },
             onPermissionsDenied = { deniedPermissions ->
-                Log.e("WiFiDirectDemo", "Denied permissions: $deniedPermissions")
+                handleDeniedPermissions(deniedPermissions)
             }
         )
     }
+    private fun handleDeniedPermissions(deniedPermissions: List<String>) {
+        val permanentlyDenied = deniedPermissions.filter { permission ->
+            !ActivityCompat.shouldShowRequestPermissionRationale(requireActivity(), permission)
+        }
+
+        if (permanentlyDenied.isNotEmpty()) {
+            showAppSettingsPrompt("Some critical permissions are permanently denied. Please enable them in Settings to proceed.")
+        } else {
+            Snackbar.make(
+                binding.root,
+                "The app needs these permissions to function. Please grant them.",
+                Snackbar.LENGTH_LONG
+            )
+                .setAction("Retry") {
+                    PermissionsUtil.requestPermissions(this)
+                }
+                .show()
+        }
+    }
+
+    fun showAppSettingsPrompt(message: String) {
+        AlertDialog.Builder(requireContext())
+            .setTitle("Permission Required")
+            .setMessage(message)
+            .setPositiveButton("Open Settings") { _, _ ->
+                val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
+                    data = android.net.Uri.fromParts("package", requireContext().packageName, null)
+                }
+                startActivity(intent)
+            }
+            .setNegativeButton("Cancel", null)
+            .show()
+    }
+
     override fun onResume() {
         super.onResume()
         viewModel.registerReceiver(requireContext())
