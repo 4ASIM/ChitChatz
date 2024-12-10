@@ -279,30 +279,30 @@ class ChattingFragment : Fragment(R.layout.fragment_chatting) {
         }
     }
 
-    private fun sendDisconnectMessage() {
-        thread {
-            try {
-                socket?.getOutputStream()?.let { outputStream ->
-                    val dataOutputStream = DataOutputStream(outputStream)
-                    dataOutputStream.writeUTF("DISCONNECT")
-                    dataOutputStream.flush()
-                }
-            } catch (e: IOException) {
-                e.printStackTrace()
-            }
-            finally {
-                closeConnection() // Ensure cleanup after sending the disconnect message
-            }
-        }
-    }
-    private fun closeConnection() {
-        try {
-            socket?.close()
-            serverSocket?.close()
-        } catch (e: IOException) {
-            e.printStackTrace()
-        }
-    }
+//    private fun sendDisconnectMessage() {
+//        thread {
+//            try {
+//                socket?.getOutputStream()?.let { outputStream ->
+//                    val dataOutputStream = DataOutputStream(outputStream)
+//                    dataOutputStream.writeUTF("DISCONNECT")
+//                    dataOutputStream.flush()
+//                }
+//            } catch (e: IOException) {
+//                e.printStackTrace()
+//            }
+//            finally {
+//                closeConnection() // Ensure cleanup after sending the disconnect message
+//            }
+//        }
+//    }
+//    private fun closeConnection() {
+//        try {
+//            socket?.close()
+//            serverSocket?.close()
+//        } catch (e: IOException) {
+//            e.printStackTrace()
+//        }
+//    }
 
 
     private fun getVideoThumbnail(videoUri: Uri): Bitmap? {
@@ -418,21 +418,31 @@ class ChattingFragment : Fragment(R.layout.fragment_chatting) {
 
 
     private fun sendMessage(message: String) {
-        thread {
-            try {
-                socket?.getOutputStream()?.let { outputStream ->
-                    val dataOutputStream = DataOutputStream(outputStream)
-                    dataOutputStream.writeUTF("TEXT")
-                    dataOutputStream.writeUTF(message)
-                    activity?.runOnUiThread {
-                        addMessage(message, true, null)
+        // Trim the message to remove leading/trailing spaces
+        val trimmedMessage = message.trim()
+
+        if (trimmedMessage.isNotEmpty()) {
+            thread {
+                try {
+                    socket?.getOutputStream()?.let { outputStream ->
+                        val dataOutputStream = DataOutputStream(outputStream)
+                        dataOutputStream.writeUTF("TEXT")
+                        dataOutputStream.writeUTF(trimmedMessage) // Send the trimmed message
+                        activity?.runOnUiThread {
+                            addMessage(trimmedMessage, true, null) // Use the trimmed message
+                        }
                     }
+                } catch (e: IOException) {
+                    e.printStackTrace()
                 }
-            } catch (e: IOException) {
-                e.printStackTrace()
+            }
+        } else {
+            activity?.runOnUiThread {
+                Toast.makeText(activity, "Message cannot be empty", Toast.LENGTH_SHORT).show()
             }
         }
     }
+
 
 
     private fun saveDocumentToDeviceStorage(byteArray: ByteArray, fileName: String): String {

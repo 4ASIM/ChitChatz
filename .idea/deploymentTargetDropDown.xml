@@ -10,7 +10,16 @@
               <deviceKey>
                 <Key>
                   <type value="SERIAL_NUMBER" />
-                  <value value="08066332C8105875" />
+                  <value value="192.168.18.74:5555" />
+                </Key>
+              </deviceKey>
+            </Target>
+            <Target>
+              <type value="RUNNING_DEVICE_TARGET" />
+              <deviceKey>
+                <Key>
+                  <type value="SERIAL_NUMBER" />
+                  <value value="192.168.18.90:5555" />
                 </Key>
               </deviceKey>
             </Target>
