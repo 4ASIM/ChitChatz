@@ -5,6 +5,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.setupActionBarWithNavController
+import com.example.chitchatz.Ui.WifiDirectFragment.ChattingFragment.PermissionsUtil.NetworkLiveData
 
 class MainActivity : AppCompatActivity() {
 

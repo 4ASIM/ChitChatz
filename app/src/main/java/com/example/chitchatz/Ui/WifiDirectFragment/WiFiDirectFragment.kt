@@ -8,6 +8,7 @@ import android.os.Bundle
 import android.util.Log
 import android.view.View
 import android.view.animation.Animation
+import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.addCallback
 import androidx.appcompat.app.AlertDialog
@@ -19,6 +20,8 @@ import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.airbnb.lottie.LottieAnimationView
 import com.example.chitchatz.R
+import com.example.chitchatz.Ui.WifiDirectFragment.ChattingFragment.PermissionsUtil.NetworkLiveData
+import com.example.chitchatz.Ui.WifiDirectFragment.ChattingFragment.PermissionsUtil.NetworkUtil
 import com.example.chitchatz.Ui.WifiDirectFragment.ChattingFragment.PermissionsUtil.PermissionsUtil
 import com.example.chitchatz.databinding.FragmentWiFiDirectBinding
 import com.google.android.material.floatingactionbutton.FloatingActionButton
@@ -33,6 +36,8 @@ class WiFiDirectFragment : Fragment(R.layout.fragment_wi_fi_direct) {
     private lateinit var deviceAdapter: DeviceAdapter
     private lateinit var connectionLottie: LottieAnimationView
 
+    private lateinit var networkLiveData: NetworkLiveData
+
 
 
     companion object {
@@ -42,6 +47,15 @@ class WiFiDirectFragment : Fragment(R.layout.fragment_wi_fi_direct) {
     override fun onViewCreated(view: android.view.View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         _binding = FragmentWiFiDirectBinding.bind(view)
+
+        networkLiveData = NetworkLiveData(requireActivity().application)
+
+        // Observe NetworkLiveData
+        networkLiveData.observe(viewLifecycleOwner) { isConnected ->
+            if (!isConnected) {
+                showNoInternetDialog()
+            }
+        }
 
         requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner) {
             showExitConfirmationDialog()
@@ -189,6 +203,33 @@ class WiFiDirectFragment : Fragment(R.layout.fragment_wi_fi_direct) {
                 .show()
         }
     }
+    private fun showNoInternetDialog() {
+        // Inflate the custom layout
+        val customView = layoutInflater.inflate(R.layout.no_internet, null)
+
+        // Find views within the custom layout if needed
+        val retryButton: TextView = customView.findViewById(R.id.ab_retry)
+
+        // Create the AlertDialog
+        val alertDialog = AlertDialog.Builder(requireContext()) // Optional: Custom style
+            .setView(customView)
+            .setCancelable(false)
+            .create()
+
+        // Set up the retry button's click listener
+        retryButton.setOnClickListener {
+            if (NetworkUtil.isInternetAvailable(requireContext())) {
+                Toast.makeText(requireContext(), "Internet Connected!", Toast.LENGTH_SHORT).show()
+                alertDialog.dismiss()
+            } else {
+                Toast.makeText(requireContext(), "Still no connection.", Toast.LENGTH_SHORT).show()
+            }
+        }
+
+        // Show the AlertDialog
+        alertDialog.show()
+    }
+
 
     fun showAppSettingsPrompt(message: String) {
         AlertDialog.Builder(requireContext())

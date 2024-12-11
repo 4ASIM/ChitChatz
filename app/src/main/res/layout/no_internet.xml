@@ -73,7 +73,7 @@
             android:layout_gravity="bottom"
             android:gravity="center">
             <TextView
-                android:id="@+id/ab_no"
+                android:id="@+id/ab_retry"
                 android:layout_width="130dp"
                 android:layout_height="wrap_content"
                 android:layout_margin="12dp"
@@ -83,29 +83,13 @@
                 android:paddingTop="4dp"
                 android:paddingEnd="16dp"
                 android:paddingBottom="4dp"
-                android:text="Wifi"
+                android:text="Retry Again"
                 android:textAlignment="center"
                 android:textAllCaps="false"
                 android:textColor="@android:color/white"
                 android:textSize="18dp"
                 android:textStyle="bold" />
-            <TextView
-                android:id="@+id/ab_Yes"
-                android:layout_width="130dp"
-                android:layout_height="wrap_content"
-                android:layout_margin="12dp"
-                android:background="@drawable/background_rounded_button_primary"
-                android:minWidth="66dp"
-                android:paddingStart="16dp"
-                android:paddingTop="4dp"
-                android:paddingEnd="16dp"
-                android:paddingBottom="4dp"
-                android:text="Mobile Data"
-                android:textAlignment="center"
-                android:textAllCaps="false"
-                android:textColor="@android:color/white"
-                android:textSize="18dp"
-                android:textStyle="bold" />
+
 
         </LinearLayout>
 
