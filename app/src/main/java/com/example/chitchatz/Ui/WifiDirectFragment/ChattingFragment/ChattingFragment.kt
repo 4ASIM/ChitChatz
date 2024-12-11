@@ -136,22 +136,18 @@ class ChattingFragment : Fragment(R.layout.fragment_chatting) {
             startActivityForResult(intent, REQUEST_DOCUMENT_PICK)
         }
 
-        // Contact Picker FAB
         binding.ContactFabBtn.setOnClickListener {
             val intent = Intent(Intent.ACTION_PICK, ContactsContract.Contacts.CONTENT_URI)
             startActivityForResult(intent, REQUEST_CONTACT_PICK)
         }
 
-        // Main FAB (Toggle visibility of other buttons)
         binding.mainFabBtn.setOnClickListener {
             if (isExpanded) {
-                // Hide all other buttons
                 binding.galleryFabBtn.visibility = View.GONE
                 binding.shareFabBtn.visibility = View.GONE
                 binding.sendFabBtn.visibility = View.GONE
                 binding.ContactFabBtn.visibility = View.GONE
             } else {
-                // Show all other buttons
                 binding.galleryFabBtn.visibility = View.VISIBLE
                 binding.shareFabBtn.visibility = View.VISIBLE
                 binding.sendFabBtn.visibility = View.VISIBLE

@@ -176,15 +176,7 @@ class WiFiDirectFragment : Fragment(R.layout.fragment_wi_fi_direct) {
         if (permanentlyDenied.isNotEmpty()) {
             showAppSettingsPrompt("Some critical permissions are permanently denied. Please enable them in Settings to proceed.")
         } else {
-            Snackbar.make(
-                binding.root,
-                "The app needs these permissions to function. Please grant them.",
-                Snackbar.LENGTH_LONG
-            )
-                .setAction("Retry") {
-                    PermissionsUtil.requestPermissions(this)
-                }
-                .show()
+
         }
     }
     private fun showNoInternetDialog() {
@@ -198,10 +190,10 @@ class WiFiDirectFragment : Fragment(R.layout.fragment_wi_fi_direct) {
 
         retryButton.setOnClickListener {
             if (NetworkUtil.isInternetAvailable(requireContext())) {
-                Toast.makeText(requireContext(), "Internet Connected!", Toast.LENGTH_SHORT).show()
+
                 alertDialog.dismiss()
             } else {
-                Toast.makeText(requireContext(), "Still no connection.", Toast.LENGTH_SHORT).show()
+
             }
         }
 
