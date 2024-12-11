@@ -79,6 +79,7 @@ object PermissionsUtil {
                 listOf(
                     Manifest.permission.NEARBY_WIFI_DEVICES,  // Add this for API 33 and above
                     Manifest.permission.READ_MEDIA_IMAGES,
+                    Manifest.permission.MANAGE_DOCUMENTS,
                     Manifest.permission.READ_MEDIA_VIDEO
                 )
             )
