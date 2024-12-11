@@ -95,7 +95,7 @@ class MessageAdapter(
                     }
                 }
             }
-            messageItem.documentUri != null -> { // Display document message
+            messageItem.documentUri != null -> {
                 if (holder is SentMessageViewHolder) {
                     holder.documentLayout.visibility = View.VISIBLE
                     holder.documentName.text = messageItem.documentName
@@ -105,7 +105,6 @@ class MessageAdapter(
                     holder.frameLayout.visibility = View.GONE
                     holder.messageTimestamp.text = formattedTime
 
-                    // Handle document click (if necessary)
                     holder.documentLayout.setOnClickListener {
                         val intent = Intent(Intent.ACTION_VIEW).apply {
                             setDataAndType(Uri.parse(messageItem.documentUri), "*/*")
@@ -122,15 +121,13 @@ class MessageAdapter(
                     holder.videoIcon.visibility = View.GONE
                     holder.frameLayout.visibility = View.GONE
                     holder.messageTimestamp.text = formattedTime
-
-                    // Handle document click (if necessary)
                     holder.documentLayout.setOnClickListener {
                         openDocument(holder.itemView.context, messageItem.documentUri)
                     }
                 }
             }
 
-            messageItem.imageUri != null -> { // Display image from URI
+            messageItem.imageUri != null -> {
                 if (holder is SentMessageViewHolder) {
                     Glide.with(holder.itemView.context)
                         .load(messageItem.imageUri)
@@ -164,10 +161,10 @@ class MessageAdapter(
                 }
             }
 
-            messageItem.videoUri != null -> { // Display video
+            messageItem.videoUri != null -> {
                 if (holder is SentMessageViewHolder) {
                     Glide.with(holder.itemView.context)
-                        .load(messageItem.videoUri) // Load video thumbnail
+                        .load(messageItem.videoUri)
                         .placeholder(R.drawable.loading_2_svgrepo_com)
                         .into(holder.messageImageView)
 
@@ -179,11 +176,10 @@ class MessageAdapter(
                         showVideoPreview(messageItem.videoUri)
                     }
 
-                    // Show video icon for video message
                     holder.videoIcon.visibility = View.VISIBLE
                 } else if (holder is ReceivedMessageViewHolder) {
                     Glide.with(holder.itemView.context)
-                        .load(messageItem.videoUri) // Load video thumbnail
+                        .load(messageItem.videoUri)
                         .placeholder(R.drawable.loading_2_svgrepo_com)
                         .into(holder.messageImageView)
 
@@ -194,13 +190,11 @@ class MessageAdapter(
                     holder.messageImageView.setOnClickListener {
                         showVideoPreview(messageItem.videoUri)
                     }
-
-                    // Show video icon for video message
                     holder.videoIcon.visibility = View.VISIBLE
                 }
             }
 
-            messageItem.imageBitmap != null -> { // Fallback to bitmap if URI is not available
+            messageItem.imageBitmap != null -> {
                 val byteArray = bitmapToByteArray(messageItem.imageBitmap)
 
                 if (holder is SentMessageViewHolder) {
@@ -215,8 +209,6 @@ class MessageAdapter(
                     holder.messageImageView.setOnClickListener {
                         showImagePreview(null, byteArray)
                     }
-
-                    // Hide video icon for image message
                     holder.videoIcon.visibility = View.GONE
                 } else if (holder is ReceivedMessageViewHolder) {
                     Glide.with(holder.itemView.context)
@@ -230,13 +222,11 @@ class MessageAdapter(
                     holder.messageImageView.setOnClickListener {
                         showImagePreview(null, byteArray)
                     }
-
-                    // Hide video icon for image message
                     holder.videoIcon.visibility = View.GONE
                 }
             }
 
-            messageItem.message != null -> { // Display text message
+            messageItem.message != null -> {
                 if (holder is SentMessageViewHolder) {
                     holder.messageTextView.text = messageItem.message
                     holder.messageImageView.visibility = View.GONE
@@ -244,7 +234,6 @@ class MessageAdapter(
                     holder.messageTextView.visibility = View.VISIBLE
                     holder.messageTimestamp.text = formattedTime
 
-                    // Hide video icon for text message
                     holder.videoIcon.visibility = View.GONE
                 } else if (holder is ReceivedMessageViewHolder) {
                     holder.messageTextView.text = messageItem.message
@@ -253,7 +242,6 @@ class MessageAdapter(
                     holder.messageTextView.visibility = View.VISIBLE
                     holder.messageTimestamp.text = formattedTime
 
-                    // Hide video icon for text message
                     holder.videoIcon.visibility = View.GONE
                 }
             }
@@ -285,13 +273,6 @@ class MessageAdapter(
             context.startActivity(intent)
         }
     }
-
-//    private fun navigateToContactDetails(view: View, bundle: Bundle) {
-//        val navController = view.findNavController()
-//        navController.navigate(R.id.action_currentFragment_to_contactDetailsFragment, bundle)
-//    }
-
-
 
     inner class SentMessageViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         val messageTextView: TextView = view.findViewById(R.id.textMessage)

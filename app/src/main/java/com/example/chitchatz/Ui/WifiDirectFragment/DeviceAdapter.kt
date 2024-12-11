@@ -27,58 +27,46 @@ class DeviceAdapter(
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val device = wifiP2pDeviceList[position]
         holder.bind(device)
-//        holder.itemView.setOnClickListener { onDeviceClick(device) }
         holder.connectButton.setOnClickListener {
             showConfirmationDialog(holder.itemView, device)
         }
     }
     private fun showConfirmationDialog(view: View, device: WifiP2pDevice) {
-        // Inflate the custom layout
         val customView = LayoutInflater.from(view.context).inflate(R.layout.confirmation_msg, null)
-
-        // Initialize the views from your custom layout
         val alertDialogTitle = customView.findViewById<TextView>(R.id.alert_dialog_title)
         val alertDialogText = customView.findViewById<TextView>(R.id.alert_dialog_text)
         val btnYes = customView.findViewById<TextView>(R.id.ab_Yes)
         val btnNo = customView.findViewById<TextView>(R.id.ab_no)
 
-        // Set the dialog content
         alertDialogTitle.text = "Connect to Device"
         alertDialogText.text = "Do you want to connect to ${device.deviceName}?"
 
-        // Create the AlertDialog using a custom view
         val dialog = AlertDialog.Builder(view.context)
             .setView(customView)
-            .setCancelable(false) // Prevent dismissing by clicking outside the dialog
+            .setCancelable(false)
             .create()
 
-        // Handle button clicks
         btnYes.setOnClickListener {
-            onDeviceClick(device) // Proceed with connection logic
+            onDeviceClick(device)
             dialog.dismiss()
         }
         btnNo.setOnClickListener {
-            dialog.dismiss() // Dismiss the dialog
+            dialog.dismiss()
         }
         dialog?.window?.setBackgroundDrawableResource(android.R.color.transparent)
         // Show the dialog
         dialog.show()
     }
-
-
     override fun getItemCount(): Int = wifiP2pDeviceList.size
-
     fun updateDevices(newDeviceList: List<WifiP2pDevice>) {
         wifiP2pDeviceList = newDeviceList
         notifyDataSetChanged()
     }
-
     class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         private val tvDeviceName: TextView = itemView.findViewById(R.id.tvDeviceName)
         private val tvDeviceAddress: TextView = itemView.findViewById(R.id.tvDeviceAddress)
         private val tvDeviceDetails: TextView = itemView.findViewById(R.id.tvDeviceDetails)
         val connectButton: Button = itemView.findViewById(R.id.Connection)
-
         fun bind(device: WifiP2pDevice) {
             tvDeviceName.text = device.deviceName
             tvDeviceAddress.text = device.deviceAddress

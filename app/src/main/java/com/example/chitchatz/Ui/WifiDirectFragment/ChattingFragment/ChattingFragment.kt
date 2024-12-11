@@ -96,15 +96,11 @@ class ChattingFragment : Fragment(R.layout.fragment_chatting) {
                 binding.textSend.text.clear()
             }
         }
-
-        // Handle Photo Picker Button Click
-
-        // Handle Floating Button Actions
         setupFabActions()
     }
 
     private fun setupFabActions() {
-        // Image Picker FAB
+
         binding.galleryFabBtn.setOnClickListener {
             val intent =
                 Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI).apply {
@@ -114,7 +110,7 @@ class ChattingFragment : Fragment(R.layout.fragment_chatting) {
             startActivityForResult(intent, REQUEST_IMAGE_PICK)
         }
 
-        // Video Picker FAB
+
         binding.shareFabBtn.setOnClickListener {
             val intent =
                 Intent(Intent.ACTION_PICK, MediaStore.Video.Media.EXTERNAL_CONTENT_URI).apply {
@@ -124,19 +120,16 @@ class ChattingFragment : Fragment(R.layout.fragment_chatting) {
             startActivityForResult(intent, REQUEST_VIDEO_PICK)
         }
 
-        // Document Picker FAB
-        // Document Picker FAB
         binding.sendFabBtn.setOnClickListener {
             val intent = Intent(Intent.ACTION_GET_CONTENT).apply {
-                type = "application/pdf" // Restrict to PDF documents
-                // For multiple document types, use the following line
+                type = "application/pdf"
                 val mimeTypes = arrayOf(
                     "application/pdf",
-                    "application/msword", // .doc
-                    "application/vnd.openxmlformats-officedocument.wordprocessingml.document", // .docx
-                    "application/vnd.ms-excel", // .xls
-                    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", // .xlsx
-                    "text/plain" // .txt
+                    "application/msword",
+                    "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+                    "application/vnd.ms-excel",
+                    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                    "text/plain"
                 )
                 putExtra(Intent.EXTRA_MIME_TYPES, mimeTypes)
             }
@@ -174,7 +167,6 @@ class ChattingFragment : Fragment(R.layout.fragment_chatting) {
         super.onActivityResult(requestCode, resultCode, data)
         when (requestCode) {
             REQUEST_IMAGE_PICK, REQUEST_VIDEO_PICK -> {
-                // Check if multiple items are selected
                 val clipData = data?.clipData
                 val uriList = mutableListOf<Uri>()
 
@@ -183,11 +175,8 @@ class ChattingFragment : Fragment(R.layout.fragment_chatting) {
                         uriList.add(clipData.getItemAt(i).uri)
                     }
                 } else {
-                    // Single item selected
                     data?.data?.let { uriList.add(it) }
                 }
-
-                // Process each selected URI
                 uriList.forEach { uri ->
                     if (requestCode == REQUEST_IMAGE_PICK) {
                         processImageSelection(uri)
@@ -201,7 +190,7 @@ class ChattingFragment : Fragment(R.layout.fragment_chatting) {
                 val documentUri = data?.data
                 if (documentUri != null) {
                     val documentName =
-                        getFileName(documentUri) // Helper function to get the file name
+                        getFileName(documentUri)
                     sendDocument(documentUri, documentName)
                     addMessage(
                         message = null,
@@ -236,11 +225,9 @@ class ChattingFragment : Fragment(R.layout.fragment_chatting) {
         var contactPhone = "Unknown"
         cursor?.use {
             if (it.moveToFirst()) {
-                // Get contact name
-                contactName =
-                    it.getString(it.getColumnIndexOrThrow(ContactsContract.Contacts.DISPLAY_NAME))
 
-                // Get contact phone number
+                contactName = it.getString(it.getColumnIndexOrThrow(ContactsContract.Contacts.DISPLAY_NAME))
+
                 val contactId = it.getString(it.getColumnIndex(ContactsContract.Contacts._ID))
                 val phoneCursor = requireContext().contentResolver.query(
                     ContactsContract.CommonDataKinds.Phone.CONTENT_URI,
@@ -287,45 +274,17 @@ class ChattingFragment : Fragment(R.layout.fragment_chatting) {
 
     private fun processVideoSelection(videoUri: Uri) {
         try {
-            val thumbnail = getVideoThumbnail(videoUri) // Generate thumbnail
+            val thumbnail = getVideoThumbnail(videoUri)
             val videoSize =
                 requireContext().contentResolver.openFileDescriptor(videoUri, "r")?.statSize
                     ?: throw IOException("Unable to retrieve video size")
 
-            sendVideo(videoUri, videoSize) // Pass URI and size for streaming
-
-            // Optionally, display the thumbnail in the UI
+            sendVideo(videoUri, videoSize)
             addMessage(null, true, videoUri = videoUri.toString(), videoThumbnail = thumbnail)
         } catch (e: IOException) {
             e.printStackTrace()
         }
     }
-
-//    private fun sendDisconnectMessage() {
-//        thread {
-//            try {
-//                socket?.getOutputStream()?.let { outputStream ->
-//                    val dataOutputStream = DataOutputStream(outputStream)
-//                    dataOutputStream.writeUTF("DISCONNECT")
-//                    dataOutputStream.flush()
-//                }
-//            } catch (e: IOException) {
-//                e.printStackTrace()
-//            }
-//            finally {
-//                closeConnection() // Ensure cleanup after sending the disconnect message
-//            }
-//        }
-//    }
-//    private fun closeConnection() {
-//        try {
-//            socket?.close()
-//            serverSocket?.close()
-//        } catch (e: IOException) {
-//            e.printStackTrace()
-//        }
-//    }
-
 
     private fun getVideoThumbnail(videoUri: Uri): Bitmap? {
         return try {
@@ -372,17 +331,15 @@ class ChattingFragment : Fragment(R.layout.fragment_chatting) {
             try {
                 socket?.getOutputStream()?.let { outputStream ->
                     val dataOutputStream = DataOutputStream(outputStream)
-                    val buffer = ByteArray(1024 * 1024) // 1mb buffer
+                    val buffer = ByteArray(1024 * 1024)
                     var bytesRead: Int
                     var totalBytesRead = 0L
 
-                    // Open the video as a stream
                     val inputStream =
                         requireContext().contentResolver.openInputStream(videoUri) ?: return@thread
                     dataOutputStream.writeUTF("VIDEO")
-                    dataOutputStream.writeLong(videoSize) // Send video size
+                    dataOutputStream.writeLong(videoSize)
 
-                    // Stream the video in chunks
                     while (inputStream.read(buffer).also { bytesRead = it } != -1) {
                         dataOutputStream.write(buffer, 0, bytesRead)
                         totalBytesRead += bytesRead
@@ -440,7 +397,6 @@ class ChattingFragment : Fragment(R.layout.fragment_chatting) {
 
 
     private fun sendMessage(message: String) {
-        // Trim the message to remove leading/trailing spaces
         val trimmedMessage = message.trim()
 
         if (trimmedMessage.isNotEmpty()) {
@@ -449,9 +405,9 @@ class ChattingFragment : Fragment(R.layout.fragment_chatting) {
                     socket?.getOutputStream()?.let { outputStream ->
                         val dataOutputStream = DataOutputStream(outputStream)
                         dataOutputStream.writeUTF("TEXT")
-                        dataOutputStream.writeUTF(trimmedMessage) // Send the trimmed message
+                        dataOutputStream.writeUTF(trimmedMessage)
                         activity?.runOnUiThread {
-                            addMessage(trimmedMessage, true, null) // Use the trimmed message
+                            addMessage(trimmedMessage, true, null)
                         }
                     }
                 } catch (e: IOException) {
@@ -524,10 +480,9 @@ class ChattingFragment : Fragment(R.layout.fragment_chatting) {
             .setTitle("Exit Chat")
             .setMessage("Are you sure you want to exit the chat?")
             .setPositiveButton("Yes") { _, _ ->
-                // Navigate back or pop the back stack
                 findNavController().popBackStack()
             }
-            .setNegativeButton("No", null) // Dismiss the dialog
+            .setNegativeButton("No", null)
             .show()
     }
 
@@ -570,7 +525,7 @@ class ChattingFragment : Fragment(R.layout.fragment_chatting) {
 
                                 activity?.runOnUiThread {
                                     binding.progressContainer.visibility =
-                                        View.VISIBLE // Show progress UI
+                                        View.VISIBLE
                                     binding.progressText.text = "0 / $videoSize bytes received"
                                 }
                                 val fileName = "VID_${System.currentTimeMillis()}.mp4"
@@ -595,7 +550,7 @@ class ChattingFragment : Fragment(R.layout.fragment_chatting) {
                                 }
 
                                 var bytesRead: Long = 0
-                                val buffer = ByteArray(1024 * 1024) // 1 mb buffer
+                                val buffer = ByteArray(1024 * 1024)
                                 while (bytesRead < videoSize) {
                                     val sizeToRead =
                                         (videoSize - bytesRead).coerceAtMost(buffer.size.toLong())
@@ -662,18 +617,14 @@ class ChattingFragment : Fragment(R.layout.fragment_chatting) {
                                     )
                                 }
                             }
-
                             "DISCONNECT" -> {
-                                // Acknowledge the disconnection
                                 sendAcknowledge()
                                 activity?.runOnUiThread {
                                     if (isAdded) {
                                         socket?.close()
                                         serverSocket?.close()
 
-                                        // Show custom dialog
                                         val dialog = CustomAlertDialogFragment {
-                                            // Handle the navigation logic in the dialog's callback
                                             findNavController().navigate(R.id.action_chattingFragment_to_wiFiDirectFragment)
                                         }
                                         dialog.show(childFragmentManager, "CustomAlertDialog")
@@ -690,7 +641,6 @@ class ChattingFragment : Fragment(R.layout.fragment_chatting) {
                         socket?.close()
                         serverSocket?.close()
                         val dialog = CustomAlertDialogFragment {
-                            // Handle the navigation logic in the dialog's callback
                             findNavController().navigate(R.id.action_chattingFragment_to_wiFiDirectFragment)
                         }
                         dialog.show(childFragmentManager, "CustomAlertDialog")
@@ -794,21 +744,14 @@ class ChattingFragment : Fragment(R.layout.fragment_chatting) {
     }
 
     override fun onDestroyView() {
-
-
-        // Launch a coroutine in the IO thread to perform network operations in the background
         GlobalScope.launch(Dispatchers.IO) {
             try {
-
-                // Send disconnect message to the other device
                 socket?.getOutputStream()?.let { outputStream ->
                     val dataOutputStream = DataOutputStream(outputStream)
                     dataOutputStream.writeUTF("DISCONNECT")
                     socket?.close()
                     serverSocket?.close()
                 }
-
-                // Close the socket
                 socket?.close()
                 serverSocket?.close()
 

@@ -31,15 +31,10 @@ class WiFiDirectFragment : Fragment(R.layout.fragment_wi_fi_direct) {
 
     private var _binding: FragmentWiFiDirectBinding? = null
     private val binding get() = _binding!!
-
     private val viewModel: WiFiDirectViewModel by viewModels()
     private lateinit var deviceAdapter: DeviceAdapter
     private lateinit var connectionLottie: LottieAnimationView
-
     private lateinit var networkLiveData: NetworkLiveData
-
-
-
     companion object {
         const val TAG = "WiFiDirectDemo"
     }
@@ -47,10 +42,7 @@ class WiFiDirectFragment : Fragment(R.layout.fragment_wi_fi_direct) {
     override fun onViewCreated(view: android.view.View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         _binding = FragmentWiFiDirectBinding.bind(view)
-
         networkLiveData = NetworkLiveData(requireActivity().application)
-
-        // Observe NetworkLiveData
         networkLiveData.observe(viewLifecycleOwner) { isConnected ->
             if (!isConnected) {
                 showNoInternetDialog()
@@ -64,33 +56,26 @@ class WiFiDirectFragment : Fragment(R.layout.fragment_wi_fi_direct) {
         val animationView = binding.animationView
         connectionLottie = binding.connectionLottie
 
-        // Initialize ViewModel
         viewModel.initialize(requireContext())
         viewModel.connectionTimeout.observe(viewLifecycleOwner) { timeout ->
             if (timeout) {
-                // Stop the Lottie animation
                 connectionLottie.cancelAnimation()
                 connectionLottie.visibility = View.GONE
             }
         }
 
-
-
-        // Set up RecyclerView
         deviceAdapter = DeviceAdapter(emptyList()) { selectedDevice ->
             Log.d(TAG, "Selected device: ${selectedDevice.deviceName} (${selectedDevice.deviceAddress})")
             connectionLottie.visibility = View.VISIBLE
-            connectionLottie.playAnimation() // Play Lottie animation
+            connectionLottie.playAnimation()
             viewModel.connectToDevice(selectedDevice, requireContext())
 
         }
 
-        // Add this line to fix RecyclerView layout issue
         binding.rvShowdevicelist.layoutManager = LinearLayoutManager(requireContext())
 
         binding.rvShowdevicelist.adapter = deviceAdapter
 
-        // Observers
         viewModel.deviceList.observe(viewLifecycleOwner) { devices ->
             deviceAdapter.updateDevices(devices)
         }
@@ -136,7 +121,6 @@ class WiFiDirectFragment : Fragment(R.layout.fragment_wi_fi_direct) {
             animationView.visibility = View.GONE
 
         }
-        // Register receiver
         viewModel.registerReceiver(requireContext())
     }
 
@@ -145,10 +129,10 @@ class WiFiDirectFragment : Fragment(R.layout.fragment_wi_fi_direct) {
             .setTitle("Exit App")
             .setMessage("Are you sure you want to exit?")
             .setPositiveButton("Yes") { _, _ ->
-                requireActivity().finish() // Close the app or activity
+                requireActivity().finish()
             }
             .setNegativeButton("No") { dialog, _ ->
-                dialog.dismiss() // Close the dialog
+                dialog.dismiss()
             }
             .show()
     }
@@ -204,19 +188,14 @@ class WiFiDirectFragment : Fragment(R.layout.fragment_wi_fi_direct) {
         }
     }
     private fun showNoInternetDialog() {
-        // Inflate the custom layout
+
         val customView = layoutInflater.inflate(R.layout.no_internet, null)
-
-        // Find views within the custom layout if needed
         val retryButton: TextView = customView.findViewById(R.id.ab_retry)
-
-        // Create the AlertDialog
-        val alertDialog = AlertDialog.Builder(requireContext()) // Optional: Custom style
+        val alertDialog = AlertDialog.Builder(requireContext())
             .setView(customView)
             .setCancelable(false)
             .create()
 
-        // Set up the retry button's click listener
         retryButton.setOnClickListener {
             if (NetworkUtil.isInternetAvailable(requireContext())) {
                 Toast.makeText(requireContext(), "Internet Connected!", Toast.LENGTH_SHORT).show()
@@ -226,11 +205,8 @@ class WiFiDirectFragment : Fragment(R.layout.fragment_wi_fi_direct) {
             }
         }
 
-        // Show the AlertDialog
         alertDialog.show()
     }
-
-
     fun showAppSettingsPrompt(message: String) {
         AlertDialog.Builder(requireContext())
             .setTitle("Permission Required")
@@ -248,7 +224,7 @@ class WiFiDirectFragment : Fragment(R.layout.fragment_wi_fi_direct) {
     override fun onResume() {
         super.onResume()
         viewModel.registerReceiver(requireContext())
-        viewModel.requestCurrentConnectionInfo() // Fetch and update connection status
+        viewModel.requestCurrentConnectionInfo()
     }
 
     override fun onPause() {

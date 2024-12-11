@@ -113,11 +113,10 @@ class WiFiDirectViewModel : ViewModel() {
     }
 
     fun connectToDevice(device: WifiP2pDevice, context: Context) {
-        // Cancel any ongoing connection attempts
+
         wifiP2pManager.cancelConnect(channel, object : WifiP2pManager.ActionListener {
             override fun onSuccess() {
                 if (isDialogShowing) {
-                    // Dismiss the dialog if it's showing
                     dismissConnectionTimeoutDialog()
                 }
                 initiateConnection(device, context)
@@ -157,12 +156,11 @@ class WiFiDirectViewModel : ViewModel() {
         connectionTimeoutHandler = Handler(Looper.getMainLooper())
         connectionTimeoutHandler?.postDelayed({
             if (!isConnected) {
-                // If still not connected after 15 seconds, stop the connection
                 wifiP2pManager.cancelConnect(channel, object : WifiP2pManager.ActionListener {
                     override fun onSuccess() {
-                        _connectionTimeout.postValue(true) // Notify timeout
+                        _connectionTimeout.postValue(true)
                         showConnectionTimeoutDialog(device, context)
-                        discoverPeers()// Restart peer discovery
+                        discoverPeers()
                     }
 
                     override fun onFailure(reason: Int) {
@@ -170,39 +168,16 @@ class WiFiDirectViewModel : ViewModel() {
                     }
                 })
             }
-        }, 15000) // 15 seconds
+        }, 15000)
     }
 
     private fun showConnectionTimeoutDialog(device: WifiP2pDevice, context: Context) {
-        // Prevent showing the dialog if it's already showing
-//        if (isDialogShowing) return
-//
-//        val dialog = AlertDialog.Builder(context).create()
-//        val customView = View.inflate(context, R.layout.timeout_dialogbox, null)
-//        val okButton = customView.findViewById<TextView>(R.id.ab_ok)
-//        okButton.setOnClickListener {
-//            dialog.dismiss()
-//            isDialogShowing = false // Reset the dialog flag
-//        }
-//
-//        dialog.setView(customView)
-//        dialog.setCancelable(false)
-//        dialog?.window?.setBackgroundDrawableResource(android.R.color.transparent)
-//        dialog.show()
-//
-//        isDialogShowing = true // Set the flag that the dialog is showing
     }
     private fun dismissConnectionTimeoutDialog() {
-        // This method will dismiss the dialog if it is currently showing
         if (isDialogShowing) {
-            // Logic to dismiss the dialog, if needed
             isDialogShowing = false
         }
     }
-//    fun onConnectionEstablished() {
-//        isConnected = true
-//        connectionTimeoutHandler?.removeCallbacksAndMessages(null) // Stop the timeout handler
-//        _connectionTimeout.postValue(false) // Clear any timeout state
-//    }
+
 
 }

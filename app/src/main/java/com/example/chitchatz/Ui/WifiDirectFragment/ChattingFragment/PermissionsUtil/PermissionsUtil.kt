@@ -14,7 +14,6 @@ object PermissionsUtil {
     fun hasPermissions(context: Context): Boolean {
         val requiredPermissions = mutableListOf<String>()
 
-        // Add common permissions
         requiredPermissions.addAll(
             listOf(
                 Manifest.permission.ACCESS_FINE_LOCATION,
@@ -26,24 +25,21 @@ object PermissionsUtil {
             )
         )
 
-        // Add permissions for Android 9 and below
         if (android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.Q) {
             requiredPermissions.add(Manifest.permission.WRITE_EXTERNAL_STORAGE)
             requiredPermissions.add(Manifest.permission.READ_EXTERNAL_STORAGE)
         }
 
-        // Add permissions for Android 13+ (API 33+)
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
             requiredPermissions.addAll(
                 listOf(
-                    Manifest.permission.NEARBY_WIFI_DEVICES,  // Add this for API 33 and above
+                    Manifest.permission.NEARBY_WIFI_DEVICES,
                     Manifest.permission.READ_MEDIA_IMAGES,
                     Manifest.permission.READ_MEDIA_VIDEO
                 )
             )
         }
 
-        // Check if all required permissions are granted
         return requiredPermissions.all { permission ->
             ActivityCompat.checkSelfPermission(
                 context,
@@ -55,7 +51,6 @@ object PermissionsUtil {
     fun requestPermissions(fragment: Fragment) {
         val requiredPermissions = mutableListOf<String>()
 
-        // Add common permissions
         requiredPermissions.addAll(
             listOf(
                 Manifest.permission.ACCESS_FINE_LOCATION,
@@ -67,17 +62,15 @@ object PermissionsUtil {
             )
         )
 
-        // Add permissions for Android 9 and below
         if (android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.Q) {
             requiredPermissions.add(Manifest.permission.WRITE_EXTERNAL_STORAGE)
             requiredPermissions.add(Manifest.permission.READ_EXTERNAL_STORAGE)
         }
 
-        // Add permissions for Android 13+ (API 33+)
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
             requiredPermissions.addAll(
                 listOf(
-                    Manifest.permission.NEARBY_WIFI_DEVICES,  // Add this for API 33 and above
+                    Manifest.permission.NEARBY_WIFI_DEVICES,
                     Manifest.permission.READ_MEDIA_IMAGES,
                     Manifest.permission.MANAGE_DOCUMENTS,
                     Manifest.permission.READ_MEDIA_VIDEO
@@ -85,7 +78,6 @@ object PermissionsUtil {
             )
         }
 
-        // Request permissions dynamically
         fragment.requestPermissions(
             requiredPermissions.toTypedArray(),
             LOCATION_PERMISSION_REQUEST_CODE
