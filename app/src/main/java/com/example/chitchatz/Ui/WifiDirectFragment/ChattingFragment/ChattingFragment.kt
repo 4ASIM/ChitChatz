@@ -125,9 +125,20 @@ class ChattingFragment : Fragment(R.layout.fragment_chatting) {
         }
 
         // Document Picker FAB
+        // Document Picker FAB
         binding.sendFabBtn.setOnClickListener {
             val intent = Intent(Intent.ACTION_GET_CONTENT).apply {
-                type = "*/*"
+                type = "application/pdf" // Restrict to PDF documents
+                // For multiple document types, use the following line
+                val mimeTypes = arrayOf(
+                    "application/pdf",
+                    "application/msword", // .doc
+                    "application/vnd.openxmlformats-officedocument.wordprocessingml.document", // .docx
+                    "application/vnd.ms-excel", // .xls
+                    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", // .xlsx
+                    "text/plain" // .txt
+                )
+                putExtra(Intent.EXTRA_MIME_TYPES, mimeTypes)
             }
             startActivityForResult(intent, REQUEST_DOCUMENT_PICK)
         }

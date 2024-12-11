@@ -107,9 +107,14 @@ class MessageAdapter(
 
                     // Handle document click (if necessary)
                     holder.documentLayout.setOnClickListener {
-                        openDocument(holder.itemView.context, messageItem.documentUri)
+                        val intent = Intent(Intent.ACTION_VIEW).apply {
+                            setDataAndType(Uri.parse(messageItem.documentUri), "*/*")
+                            flags = Intent.FLAG_GRANT_READ_URI_PERMISSION
+                        }
+                        holder.itemView.context.startActivity(intent)
                     }
-                } else if (holder is ReceivedMessageViewHolder) {
+                }
+            else if (holder is ReceivedMessageViewHolder) {
                     holder.documentLayout.visibility = View.VISIBLE
                     holder.documentName.text = messageItem.documentName
                     holder.messageImageView.visibility = View.GONE
