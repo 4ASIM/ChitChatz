@@ -27,6 +27,7 @@
         android:layout_width="200dp"
         android:layout_height="200dp"
         android:layout_marginTop="8dp"
+        android:background="@drawable/buttonborder3"
         android:gravity="center">
 
         <!-- Image Message -->
@@ -35,8 +36,9 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:contentDescription="@string/app_name"
-            android:maxWidth="250dp"
-            android:maxHeight="250dp"
+            android:padding="10dp"
+            android:maxWidth="230dp"
+            android:maxHeight="230dp"
             android:scaleType="centerCrop" />
 
         <!-- Video Icon -->
@@ -44,6 +46,7 @@
             android:id="@+id/videoIcon"
             android:layout_width="48dp"
             android:layout_height="48dp"
+            android:padding="10dp"
             android:layout_gravity="center"
             android:contentDescription="@string/app_name"
             android:visibility="gone" />
@@ -65,6 +68,7 @@
         android:orientation="vertical"
         android:padding="8dp"
         android:visibility="gone"
+        android:background="@drawable/buttonborder3"
         tools:ignore="UseCompoundDrawables">
 
         <ImageView
@@ -136,7 +140,6 @@
             android:layout_marginTop="10dp"
             android:background="@color/black" />
 
-        <!-- Details Button below the image and name -->
         <TextView
             android:id="@+id/detailsButton"
             android:layout_width="match_parent"
